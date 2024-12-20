@@ -19,7 +19,7 @@ app.use(cors()); // Allow all origins
 app.use(bodyParser.json());
 
 // Route to register a user
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   const { email, name, password } = req.body;
 
   if (!email || !name || !password) {
