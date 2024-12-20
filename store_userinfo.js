@@ -27,6 +27,7 @@ const storeUserInfo = async (email, name, password) => {
     const usersCollection = await connectToDb(); // Connect to 'users' collection
 
     // Check if the email already exists
+    // Check if the email already exists
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
       return { error: "Email already exists" };
