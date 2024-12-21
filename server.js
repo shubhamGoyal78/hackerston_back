@@ -20,7 +20,8 @@ app.use(bodyParser.json());
 
 // Route to register a user
 
-app.post("/register", storeUserInfo); // Endpoint for user registration
+app.post("/api/register", storeUserInfo); // Endpoint for user registration
+app.post("/login", loginCheck); // Endpoint for user login
 
 // Starting the server
 app.listen(port, () => {
