@@ -1,5 +1,3 @@
-// store_userinfo.js
-
 const { MongoClient } = require("mongodb");
 
 const uri =
@@ -13,7 +11,7 @@ const client = new MongoClient(uri, {
 async function connectToDb() {
   try {
     await client.connect();
-    const db = client.db("Hackerston"); // Use the Hackerston DB
+    const db = client.db("Hackerston"); // Use the Hackerston database
     return db.collection("users"); // Return 'users' collection
   } catch (error) {
     console.error("Failed to connect to the database", error);
@@ -21,33 +19,45 @@ async function connectToDb() {
   }
 }
 
-// Function to store user information
-const storeUserInfo = async (email, name, password) => {
+// Function to handle user registration
+async function storeUserInfo(req, res) {
   try {
+    const { email, name, password } = req.body; // Extract data from request body
+
+    // Validate input fields
+    if (!email || !name || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const usersCollection = await connectToDb(); // Connect to 'users' collection
 
     // Check if the email already exists
-    // Check if the email already exists
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
-      return { error: "Email already exists" };
+      return res.status(409).json({ message: "Email already registered" });
     }
 
     // Create a new user object
     const newUser = {
       email,
       name,
-      password, // In a real-world app, you should hash the password
+      password, // In production, always hash passwords before storing
+      createdAt: new Date(), // Add a timestamp
     };
 
     // Insert the new user into the collection
     await usersCollection.insertOne(newUser);
 
-    return { success: "User registered successfully!", user: newUser };
+    res.status(201).json({
+      message: "User registered successfully!",
+      user: { email, name }, // Return only non-sensitive info
+    });
   } catch (error) {
     console.error("Error storing user info:", error);
-    return { error: "Internal Server Error" };
+    res.status(500).json({ message: "Internal Server Error" });
+  } finally {
+    await client.close(); // Ensure client is closed
   }
-};
+}
 
 module.exports = { storeUserInfo };

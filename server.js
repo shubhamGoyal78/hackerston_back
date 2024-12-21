@@ -19,22 +19,8 @@ app.use(cors()); // Allow all origins
 app.use(bodyParser.json());
 
 // Route to register a user
-app.post("/api/register", async (req, res) => {
-  const { email, name, password } = req.body;
 
-  if (!email || !name || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
-  // Call the storeUserInfo function to store user data
-  const result = await storeUserInfo(email, name, password);
-
-  if (result.error) {
-    return res.status(400).json({ message: result.error });
-  }
-
-  res.status(200).json({ message: result.success, user: result.user });
-});
+app.post("/register", storeUserInfo); // Endpoint for user registration
 
 // Starting the server
 app.listen(port, () => {
