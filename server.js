@@ -7,7 +7,7 @@ const cors = require("cors");
 
 // Import the storeUserInfo function
 const { storeUserInfo } = require("./store_userinfo");
-
+const { loginCheck } = require("./login_check");
 // Creating an express app
 const app = express();
 const port = process.env.PORT || 3000;
