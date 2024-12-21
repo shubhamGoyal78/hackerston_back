@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const { v4: uuidv4 } = require("uuid"); // Import uuid for generating unique IDs
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
@@ -37,8 +38,9 @@ async function storeUserInfo(req, res) {
       return res.status(409).json({ message: "Email already registered" });
     }
 
-    // Create a new user object
+    // Create a new user object with a unique ID
     const newUser = {
+      userId: uuidv4(), // Generate a unique user ID
       email,
       name,
       password, // In production, always hash passwords before storing
@@ -50,7 +52,7 @@ async function storeUserInfo(req, res) {
 
     res.status(201).json({
       message: "User registered successfully!",
-      user: { email, name }, // Return only non-sensitive info
+      user: { userId: newUser.userId, email, name }, // Return only non-sensitive info
     });
   } catch (error) {
     console.error("Error storing user info:", error);
