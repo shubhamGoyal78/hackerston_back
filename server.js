@@ -8,6 +8,8 @@ const cors = require("cors");
 // Import the storeUserInfo function
 const { storeUserInfo } = require("./store_userinfo");
 const { loginCheck } = require("./login_check");
+const { storeCardInfo } = require("./store_cardinfo");
+
 // Creating an express app
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,6 +24,7 @@ app.use(bodyParser.json());
 
 app.post("/api/register", storeUserInfo); // Endpoint for user registration
 app.post("/login", loginCheck); // Endpoint for user login
+app.post("/store-card", storeCardInfo);
 
 // Starting the server
 app.listen(port, () => {
