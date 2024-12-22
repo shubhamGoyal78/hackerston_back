@@ -37,6 +37,13 @@ async function storeCardInfo(req, res) {
       return res.status(400).json({ message: "Invalid image URL" });
     }
 
+    // Ensure coins is a valid number
+    const coinsInt = parseInt(coins, 10); // Convert coins to an integer
+
+    if (isNaN(coinsInt)) {
+      return res.status(400).json({ message: "Coins must be a valid number" });
+    }
+
     const cardsCollection = await connectToCardDb(); // Connect to 'cards' collection
 
     // Create a new card object with a unique ID
@@ -44,7 +51,7 @@ async function storeCardInfo(req, res) {
       cardId: uuidv4(), // Generate a unique card ID
       image, // Store the image URL
       title,
-      coins,
+      coins: coinsInt, // Store coins as an integer
       createdAt: new Date(), // Add a timestamp
     };
 
@@ -57,7 +64,7 @@ async function storeCardInfo(req, res) {
         cardId: newCard.cardId,
         image, // Return the image URL
         title,
-        coins,
+        coins: coinsInt, // Return the coins as an integer
       }, // Return card info without redirect
     });
   } catch (error) {
