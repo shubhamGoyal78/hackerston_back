@@ -9,8 +9,7 @@ const cors = require("cors");
 const { storeUserInfo } = require("./store_userinfo");
 const { loginCheck } = require("./login_check");
 const { postCardInfo } = require("./store_cardinfo");
-const { fetchCardInfo } = require("./fetch_cardinfo");
-// Creating an express app
+const { fetchCardById } = require("./fetch_cardinfo");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,7 +23,7 @@ app.use(bodyParser.json());
 
 app.post("/api/register", storeUserInfo); // Endpoint for user registration
 app.post("/login", loginCheck);
-app.get("/fetch_cards", fetchCardInfo);
+app.get("/fetch_card/:id", fetchCardById); // Fetch card by ObjectId
 app.post("/store_card", postCardInfo); // The route to post card information
 
 // Starting the server
