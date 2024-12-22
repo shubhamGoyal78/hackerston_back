@@ -30,12 +30,19 @@ async function storeCardInfo(req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // Check if the 'image' field is a valid URL
+    try {
+      new URL(image); // Try to create a URL object to verify it's a valid URL
+    } catch (error) {
+      return res.status(400).json({ message: "Invalid image URL" });
+    }
+
     const cardsCollection = await connectToCardDb(); // Connect to 'cards' collection
 
     // Create a new card object with a unique ID
     const newCard = {
       cardId: uuidv4(), // Generate a unique card ID
-      image,
+      image, // Store the image URL
       title,
       coins,
       redirect,
@@ -49,7 +56,7 @@ async function storeCardInfo(req, res) {
       message: "Card information stored successfully!",
       card: {
         cardId: newCard.cardId,
-        image,
+        image, // Return the image URL
         title,
         coins,
         redirect,
