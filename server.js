@@ -25,6 +25,7 @@ app.use(bodyParser.json());
 app.post("/api/register", storeUserInfo); // Endpoint for user registration
 app.post("/login", loginCheck); // Endpoint for user login
 app.post("/store-card", storeCardInfo);
+app.get("/cards", fetchCardInfo);
 
 // Starting the server
 app.listen(port, () => {
