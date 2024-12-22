@@ -23,10 +23,10 @@ async function connectToCardDb() {
 // Function to handle card information storage
 async function storeCardInfo(req, res) {
   try {
-    const { image, title, coins, redirect } = req.body; // Extract data from request body
+    const { image, title, coins } = req.body; // Extract data from request body
 
     // Validate input fields
-    if (!image || !title || !coins || !redirect) {
+    if (!image || !title || !coins) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -45,7 +45,6 @@ async function storeCardInfo(req, res) {
       image, // Store the image URL
       title,
       coins,
-      redirect,
       createdAt: new Date(), // Add a timestamp
     };
 
@@ -59,8 +58,7 @@ async function storeCardInfo(req, res) {
         image, // Return the image URL
         title,
         coins,
-        redirect,
-      }, // Return card info
+      }, // Return card info without redirect
     });
   } catch (error) {
     console.error("Error storing card info:", error);
