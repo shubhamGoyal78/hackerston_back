@@ -20,35 +20,35 @@ async function connectToCardDb() {
   }
 }
 
-// Function to fetch card information by _id (ObjectId)
-async function fetchCardById(req, res) {
+// Function to fetch all cards
+async function fetchAllCards(req, res) {
   try {
-    const { id } = req.params; // Get the card id from URL params
     const cardsCollection = await connectToCardDb(); // Connect to 'cards' collection
 
-    // Fetch the document by ObjectId
-    const card = await cardsCollection.findOne({ _id: new ObjectId(id) });
+    // Fetch all documents from the collection
+    const cards = await cardsCollection.find({}).toArray();
 
-    if (!card) {
-      return res.status(404).json({ message: "Card not found" });
+    if (cards.length === 0) {
+      return res.status(404).json({ message: "No cards found" });
     }
 
-    // Send the card details in the response
+    // Send all cards in the response
     res.status(200).json({
-      message: "Card fetched successfully!",
-      card: {
+      message: "Cards fetched successfully!",
+      cards: cards.map((card) => ({
+        id: card._id,
         image: card.image,
         title: card.title,
         coins: card.coins,
         createdAt: card.createdAt,
-      },
+      })),
     });
   } catch (error) {
-    console.error("Error fetching card by id:", error);
+    console.error("Error fetching all cards:", error);
     res.status(500).json({ message: "Internal Server Error" });
   } finally {
     await client.close(); // Ensure client is closed
   }
 }
 
-module.exports = { fetchCardById };
+module.exports = { fetchAllCards };
