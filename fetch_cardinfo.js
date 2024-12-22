@@ -34,13 +34,11 @@ async function fetchCardInfo(req, res) {
 
     res.status(200).json({
       message: "Cards fetched successfully!",
-      cards: cards.map(({ cardId, image, title, coins, redirect }) => ({
-        cardId,
+      cards: cards.map(({ image, title, coins }) => ({
         image,
         title,
         coins,
-        redirect,
-      })), // Map only the required fields
+      })), // Map only the required fields (removed cardId and redirect)
     });
   } catch (error) {
     console.error("Error fetching card info:", error);

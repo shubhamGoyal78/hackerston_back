@@ -23,9 +23,8 @@ app.use(bodyParser.json());
 // Route to register a user
 
 app.post("/api/register", storeUserInfo); // Endpoint for user registration
-app.post("/login", loginCheck); // Endpoint for user login
-app.post("/store-card", storeCardInfo);
-app.get("/cards", fetchCardInfo);
+app.post("/login", loginCheck);
+app.get("/fetch_cards", fetchCardInfo);
 
 // Starting the server
 app.listen(port, () => {
