@@ -11,6 +11,8 @@ const { loginCheck } = require("./login_check");
 const { postCardInfo } = require("./store_cardinfo");
 const { fetchAllCards } = require("./fetch_cardinfo");
 const { postCardDetails } = require("./post_card_details"); // New post_card_details route
+const { fetchCardDetails } = require("./fetch_carddetails");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -34,6 +36,7 @@ app.post("/store_card", postCardInfo); // Endpoint to post card information
 
 // Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
+app.get("/fetch_card_details/:id", fetchCardDetails);
 
 // Starting the server
 app.listen(port, () => {
