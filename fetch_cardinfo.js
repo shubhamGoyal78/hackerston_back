@@ -40,6 +40,7 @@ async function fetchAllCards(req, res) {
         image: card.image,
         title: card.title,
         coins: card.coins,
+        redirect: card.redirect, // Include redirect field
         createdAt: card.createdAt,
       })),
     });
