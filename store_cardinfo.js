@@ -30,28 +30,23 @@ async function postCardInfo(req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if the 'image' field is a valid URL
-    try {
-      new URL(image); // Verify it's a valid URL
-    } catch (error) {
-      return res.status(400).json({ message: "Invalid image URL" });
-    }
-
-    // Check if the 'redirect' field is a valid URL
-    try {
-      new URL(redirect); // Verify it's a valid URL
-    } catch (error) {
-      return res.status(400).json({ message: "Invalid redirect URL" });
+    // Check if the 'redirect' is a valid URL or a passcode
+    if (redirect.includes("http://") || redirect.includes("https://")) {
+      try {
+        new URL(redirect); // Validate if redirect is a valid URL
+      } catch (error) {
+        return res.status(400).json({ message: "Invalid redirect URL" });
+      }
     }
 
     const cardsCollection = await connectToCardDb(); // Connect to 'cards' collection
 
     // Create a new card object
     const newCard = {
-      image, // Store the image URL
-      title, // Store the card title
-      coins, // Store the number of coins
-      redirect, // Store the redirect URL
+      image,
+      title,
+      coins,
+      redirect,
       createdAt: new Date(), // Add a timestamp
     };
 
@@ -65,7 +60,7 @@ async function postCardInfo(req, res) {
         title,
         coins,
         redirect,
-      }, // Return card info
+      },
     });
   } catch (error) {
     console.error("Error posting card info:", error);
