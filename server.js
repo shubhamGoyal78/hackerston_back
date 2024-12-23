@@ -5,26 +5,35 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-// Import the storeUserInfo function
+// Importing the functions to handle different routes
 const { storeUserInfo } = require("./store_userinfo");
 const { loginCheck } = require("./login_check");
 const { postCardInfo } = require("./store_cardinfo");
 const { fetchAllCards } = require("./fetch_cardinfo");
+const { postCardDetails } = require("./post_card_details"); // New post_card_details route
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Enable CORS
-app.use(cors()); // Allow all origins
+// Enable CORS to allow all origins
+app.use(cors());
 
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
 // Route to register a user
-
 app.post("/api/register", storeUserInfo); // Endpoint for user registration
+
+// Route for login check
 app.post("/login", loginCheck);
-app.get("/fetch_card", fetchAllCards); // Fetch card by ObjectId
-app.post("/store_card", postCardInfo); // The route to post card information
+
+// Route to fetch all cards
+app.get("/fetch_card", fetchAllCards); // Fetch all cards
+
+// Route to store card information
+app.post("/store_card", postCardInfo); // Endpoint to post card information
+
+// Route to post card details (for working_video_link, download_links, etc.)
+app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
 
 // Starting the server
 app.listen(port, () => {
