@@ -6,8 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 // Importing the functions to handle different routes
-const { storeUserInfo } = require("./store_userinfo");
-const { loginCheck } = require("./login_check");
+const { loginOrSignup } = require("./login_signup_page"); // Unified login/signup functionality
 const { postCardInfo } = require("./store_cardinfo");
 const { fetchAllCards } = require("./fetch_cardinfo");
 const { postCardDetails } = require("./post_card_details"); // New post_card_details route
@@ -22,11 +21,8 @@ app.use(cors());
 // Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
-// Route to register a user
-app.post("/api/register", storeUserInfo); // Endpoint for user registration
-
-// Route for login check
-app.post("/login", loginCheck);
+// Route for login or signup
+app.post("/api/auth", loginOrSignup); // Unified login and signup endpoint
 
 // Route to fetch all cards
 app.get("/fetch_card", fetchAllCards); // Fetch all cards
