@@ -1,4 +1,3 @@
-const jwt = require("jsonwebtoken"); // Import jsonwebtoken
 const { MongoClient } = require("mongodb");
 
 // MongoDB connection URI and client setup
@@ -21,24 +20,18 @@ async function connectToUsersDb() {
   }
 }
 
-// Function to fetch coins using token
+// Function to fetch coins using UUID
 async function fetchCoins(req, res) {
-  const token = req.headers.authorization?.split(" ")[1]; // Extract token from Authorization header
+  const userId = req.params.userId; // Extract userId from URL parameters
 
-  if (!token) {
-    return res.status(401).json({ message: "Authorization token is required" });
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
   }
 
   try {
-    // Verify the token
-    const secretKey = "your-secret-key"; // Replace with your JWT secret key
-    const decoded = jwt.verify(token, secretKey);
-
-    const userId = decoded.userId; // Extract userId from the token payload
-
     const usersCollection = await connectToUsersDb(); // Connect to 'users' collection
 
-    // Find the user by UUID _id (string format)
+    // Find the user by UUID (_id)
     const user = await usersCollection.findOne({ _id: userId });
 
     // If user does not exist, create a new document with coins field set to 0
@@ -68,12 +61,6 @@ async function fetchCoins(req, res) {
     });
   } catch (error) {
     console.error("Error fetching coins:", error);
-
-    // Handle JWT errors
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ message: "Invalid token" });
-    }
-
     res.status(500).json({ message: "Internal Server Error" });
   } finally {
     await client.close(); // Ensure client is closed
