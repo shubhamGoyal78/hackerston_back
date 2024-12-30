@@ -29,13 +29,13 @@ async function fetchCoins(req, res) {
   try {
     const usersCollection = await connectToUsersDb(); // Connect to 'users' collection
 
-    // Find the user by _id
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    // Find the user by UUID _id (string format)
+    const user = await usersCollection.findOne({ _id: userId });
 
     // If user does not exist, create a new document with coins field set to 0
     if (!user) {
       const newUser = {
-        _id: new ObjectId(userId),
+        _id: userId, // Use the UUID as _id directly
         coins: 0, // Set initial coins value to 0
       };
       await usersCollection.insertOne(newUser); // Insert the new user document
