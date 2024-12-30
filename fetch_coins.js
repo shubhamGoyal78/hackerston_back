@@ -1,6 +1,4 @@
-// fetch_coins.js
-
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 // MongoDB connection URI and client setup
 const uri =
@@ -44,10 +42,18 @@ async function fetchCoins(req, res) {
         .json({ message: "New user created with 0 coins", coins: 0 });
     }
 
-    // If the user exists, return the coins value
+    // If the user exists and the coins field is missing, add it
+    if (user.coins === undefined) {
+      await usersCollection.updateOne(
+        { _id: userId },
+        { $set: { coins: 0 } } // Set the coins field to 0
+      );
+    }
+
+    // Return the coins value (ensure it exists)
     res.status(200).json({
       message: "Coins fetched successfully",
-      coins: user.coins || 0, // Ensure coins field exists, return 0 if undefined
+      coins: user.coins || 0, // Return coins (0 if undefined)
     });
   } catch (error) {
     console.error("Error fetching coins:", error);
