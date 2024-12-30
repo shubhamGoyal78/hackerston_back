@@ -34,7 +34,7 @@ app.post("/store_card", postCardInfo); // Endpoint to post card information
 // Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
 app.get("/fetch_card_details/:id", fetchCardDetails);
-app.get("/fetch_coins/:id", fetchCoins); // Fetch coins for a specific user by their _id
+app.get("/fetch_coins", fetchCoins); // Fetch coins using token
 
 // Starting the server
 app.listen(port, () => {
