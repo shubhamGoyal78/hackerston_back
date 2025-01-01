@@ -12,6 +12,7 @@ const { fetchAllCards } = require("./fetch_cardinfo");
 const { postCardDetails } = require("./post_card_details"); // New post_card_details route
 const { fetchCardDetails } = require("./fetch_carddetails");
 const { fetchCoins } = require("./fetch_coins");
+const { addCoins } = require("./get_coin");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -35,6 +36,7 @@ app.post("/store_card", postCardInfo); // Endpoint to post card information
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
 app.get("/fetch_card_details/:id", fetchCardDetails);
 app.get("/fetch_coins/:userId", fetchCoins);
+app.get("/add-coins/:userId", addCoins);
 
 // Starting the server
 app.listen(port, () => {
