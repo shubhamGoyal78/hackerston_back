@@ -28,16 +28,20 @@ async function fetchDownloadCoins(req, res) {
   try {
     const cardsCollection = await connectToCardDb();
 
+    // Fetch document with matching unique_id in download_links array
     const card = await cardsCollection.findOne({
-      download_links: { $elemMatch: { unique_id: unique_id } },
+      "download_links.unique_id": unique_id,
     });
 
-    if (!card || !card.download_links) {
+    console.log("Card document:", card); // Log the fetched document
+
+    if (!card || !card.download_links || card.download_links.length === 0) {
       return res
         .status(404)
         .json({ message: "No download links found in the card" });
     }
 
+    // Find specific download link
     const downloadLink = card.download_links.find(
       (link) => link.unique_id === unique_id
     );
@@ -48,6 +52,7 @@ async function fetchDownloadCoins(req, res) {
         .json({ message: "No download link found for the given unique_id" });
     }
 
+    // Respond with download link details
     res.status(200).json({
       message: "Download link fetched successfully!",
       data: {
