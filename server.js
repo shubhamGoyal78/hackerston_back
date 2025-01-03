@@ -16,6 +16,7 @@ const { addCoins } = require("./get_coin");
 const { deductCoins } = require("./coins_used"); // Import the coinsUsed function
 const { fetchDownloadCoins } = require("./fetch_download_coins"); // Import fetchDownloadCoins function
 const { postDownloadLink } = require("./post_downloadlinks");
+const { updateCardDetails } = require("./post_download_tocard");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -43,6 +44,7 @@ app.get("/add-coins/:userId", addCoins);
 app.get("/coins_used/:userId", deductCoins); // Deduct 1 coin from the user's account
 app.get("/fetch_download_coins", fetchDownloadCoins); // New route for fetching download coins
 app.post("/api/download-links", postDownloadLink);
+app.post("/api/card-details/update-links", updateCardDetails);
 
 // Starting the server
 app.listen(port, () => {
