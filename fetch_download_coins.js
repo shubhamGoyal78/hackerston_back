@@ -1,6 +1,5 @@
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
-// MongoDB connection URI and client setup
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
 const client = new MongoClient(uri, {
@@ -8,41 +7,37 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
-// Function to connect to the 'cards' collection
+let clientConnected = false;
+
 async function connectToCardDb() {
-  try {
+  if (!clientConnected) {
     await client.connect();
-    const db = client.db("Hackerston"); // Use the Hackerston database
-    return db.collection("cards"); // Return 'cards' collection
-  } catch (error) {
-    console.error("Failed to connect to the database", error);
-    throw error;
+    clientConnected = true;
   }
+  const db = client.db("Hackerston");
+  return db.collection("cards");
 }
 
-// Function to fetch download coins by unique ID
 async function fetchDownloadCoins(req, res) {
-  const { unique_id } = req.query; // Get unique_id from query parameters
+  const { unique_id } = req.query;
 
   if (!unique_id) {
     return res.status(400).json({ message: "unique_id is required" });
   }
 
   try {
-    const cardsCollection = await connectToCardDb(); // Connect to 'cards' collection
+    const cardsCollection = await connectToCardDb();
 
-    // Fetch the document that matches the unique_id in the download_links array
     const card = await cardsCollection.findOne({
-      "download_links.unique_id": unique_id,
+      download_links: { $elemMatch: { unique_id: unique_id } },
     });
 
-    if (!card) {
+    if (!card || !card.download_links) {
       return res
         .status(404)
-        .json({ message: "No data found for the given unique_id" });
+        .json({ message: "No download links found in the card" });
     }
 
-    // Extract the specific download link details
     const downloadLink = card.download_links.find(
       (link) => link.unique_id === unique_id
     );
@@ -53,7 +48,6 @@ async function fetchDownloadCoins(req, res) {
         .json({ message: "No download link found for the given unique_id" });
     }
 
-    // Send the download link details in the response
     res.status(200).json({
       message: "Download link fetched successfully!",
       data: {
@@ -65,8 +59,6 @@ async function fetchDownloadCoins(req, res) {
   } catch (error) {
     console.error("Error fetching download coins:", error);
     res.status(500).json({ message: "Internal Server Error" });
-  } finally {
-    await client.close(); // Ensure client is closed
   }
 }
 
