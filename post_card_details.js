@@ -31,32 +31,17 @@ async function postCardDetails(req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Validate download_links (must have a unique_id and other fields)
-    if (
-      !Array.isArray(download_links) ||
-      download_links.some(
-        (link) => !link.unique_id || !link.title || !link.coins || !link.link
-      )
-    ) {
-      return res.status(400).json({
-        message:
-          "Each download link must have unique_id, title, coins, and link fields",
-      });
-    }
-
-    // Ensure unique_id values are unique within the array
-    const uniqueIds = new Set(download_links.map((link) => link.unique_id));
-    if (uniqueIds.size !== download_links.length) {
-      return res.status(400).json({
-        message: "Duplicate unique_id values found in download_links",
-      });
-    }
+    // Ensure each download_link has a unique_id
+    const processedDownloadLinks = download_links.map((link) => ({
+      ...link,
+      unique_id: link.unique_id || uuidv4(), // Generate a unique_id if not provided
+    }));
 
     // Validate the URLs in the array
     try {
       new URL(working_video_link); // Validate working video URL
       new URL(apply_video_link); // Validate apply video URL
-      download_links.forEach((link) => {
+      processedDownloadLinks.forEach((link) => {
         new URL(link.link); // Validate each download link URL
       });
     } catch (error) {
@@ -68,7 +53,7 @@ async function postCardDetails(req, res) {
     // Create a new card details object
     const newCardDetails = {
       working_video_link,
-      download_links,
+      download_links: processedDownloadLinks,
       apply_video_link,
       createdAt: new Date(),
     };
