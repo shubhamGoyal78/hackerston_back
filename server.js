@@ -15,9 +15,6 @@ const { fetchCoins } = require("./fetch_coins");
 const { addCoins } = require("./get_coin");
 const { deductCoins } = require("./coins_used"); // Import the coinsUsed function
 const { fetchDownloadCoins } = require("./fetch_download_coins"); // Import fetchDownloadCoins function
-const { postDownloadLink } = require("./post_downloadlinks");
-const { updateCardDetails } = require("./post_download_tocard");
-const { updateDownloadLinks } = require("./post_downloadcoins");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -44,9 +41,6 @@ app.get("/fetch_coins/:userId", fetchCoins);
 app.get("/add-coins/:userId", addCoins);
 app.get("/coins_used/:userId", deductCoins); // Deduct 1 coin from the user's account
 app.get("/fetch_download_coins", fetchDownloadCoins); // New route for fetching download coins
-app.post("/api/download-links", postDownloadLink);
-app.post("/api/card-details/update-links", updateCardDetails);
-app.post("/api/card-details/update-download-links", updateDownloadLinks);
 
 // Starting the server
 app.listen(port, () => {
