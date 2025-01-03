@@ -13,7 +13,7 @@ const { postCardDetails } = require("./post_card_details"); // New post_card_det
 const { fetchCardDetails } = require("./fetch_carddetails");
 const { fetchCoins } = require("./fetch_coins");
 const { addCoins } = require("./get_coin");
-const { coinsUsed } = require("./coins_used"); // Import the coinsUsed function
+const { deductCoins } = require("./coins_used"); // Import the coinsUsed function
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,7 +38,7 @@ app.post("/store_card_details", postCardDetails); // Endpoint for posting card d
 app.get("/fetch_card_details/:id", fetchCardDetails);
 app.get("/fetch_coins/:userId", fetchCoins);
 app.get("/add-coins/:userId", addCoins);
-app.get("/coins_used/:userId", coinsUsed); // Deduct 1 coin from the user's account
+app.get("/coins_used/:userId", deductCoins); // Deduct 1 coin from the user's account
 
 // Starting the server
 app.listen(port, () => {
