@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const { v4: uuidv4 } = require("uuid"); // UUID library for generating unique IDs
 
 // MongoDB connection URI and client setup
 const uri =
@@ -23,29 +24,38 @@ async function connectToCardDetailsDb() {
 // Function to post card details
 async function postCardDetails(req, res) {
   try {
-    const { working_video_link, download_links, apply_video_link } = req.body; // Extract data from request body
+    const { working_video_link, download_links, apply_video_link } = req.body;
 
     // Validate input fields
     if (!working_video_link || !download_links || !apply_video_link) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Validate download_links (must be an array of objects with title, coins, and link)
+    // Validate download_links (must have a unique_id and other fields)
     if (
       !Array.isArray(download_links) ||
-      download_links.some((link) => !link.title || !link.coins || !link.link)
+      download_links.some(
+        (link) => !link.unique_id || !link.title || !link.coins || !link.link
+      )
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "Each download link must have title, coins, and link fields",
-        });
+      return res.status(400).json({
+        message:
+          "Each download link must have unique_id, title, coins, and link fields",
+      });
     }
 
-    // Check if the 'working_video_link' and 'apply_video_link' are valid URLs
+    // Ensure unique_id values are unique within the array
+    const uniqueIds = new Set(download_links.map((link) => link.unique_id));
+    if (uniqueIds.size !== download_links.length) {
+      return res.status(400).json({
+        message: "Duplicate unique_id values found in download_links",
+      });
+    }
+
+    // Validate the URLs in the array
     try {
-      new URL(working_video_link); // Try to create a URL object to verify it's a valid URL
-      new URL(apply_video_link);
+      new URL(working_video_link); // Validate working video URL
+      new URL(apply_video_link); // Validate apply video URL
       download_links.forEach((link) => {
         new URL(link.link); // Validate each download link URL
       });
@@ -57,10 +67,10 @@ async function postCardDetails(req, res) {
 
     // Create a new card details object
     const newCardDetails = {
-      working_video_link, // Store the working video URL
-      download_links, // Store the download links with title, coins, and link
-      apply_video_link, // Store the apply video link URL
-      createdAt: new Date(), // Add a timestamp
+      working_video_link,
+      download_links,
+      apply_video_link,
+      createdAt: new Date(),
     };
 
     // Insert the new card details into the collection
@@ -68,11 +78,7 @@ async function postCardDetails(req, res) {
 
     res.status(201).json({
       message: "Card details stored successfully!",
-      card_details: {
-        working_video_link,
-        download_links,
-        apply_video_link,
-      }, // Return card details info
+      card_details: newCardDetails,
     });
   } catch (error) {
     console.error("Error posting card details:", error);
