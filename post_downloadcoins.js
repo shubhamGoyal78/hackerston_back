@@ -20,11 +20,9 @@ async function connectToCardDetailsDb() {
   }
 }
 
-// Function to update download_links field in card_details
 async function updateDownloadLinks(req, res) {
-  const { cardId, downloadLinks } = req.body; // Extract cardId and downloadLinks from request body
+  const { cardId, downloadLinks } = req.body;
 
-  // Validate input
   if (!cardId || !Array.isArray(downloadLinks) || downloadLinks.length === 0) {
     return res.status(400).json({
       message: "cardId and a non-empty array of downloadLinks are required",
@@ -32,24 +30,36 @@ async function updateDownloadLinks(req, res) {
   }
 
   try {
-    const cardDetailsCollection = await connectToCardDetailsDb(); // Connect to "card_details" collection
+    console.log("Connecting to card_details collection...");
+    const cardDetailsCollection = await connectToCardDetailsDb();
 
-    // Update the document's download_links field
+    console.log("Updating document with cardId:", cardId);
     const result = await cardDetailsCollection.updateOne(
-      { _id: ObjectId(cardId) }, // Match the document by its _id
-      { $set: { download_links: downloadLinks } } // Update the download_links field
+      { _id: ObjectId(cardId) },
+      { $set: { download_links: downloadLinks } }
     );
 
+    console.log("Update result:", result);
+
     if (result.modifiedCount > 0) {
-      res.status(200).json({ message: "Download links updated successfully" });
+      return res
+        .status(200)
+        .json({ message: "Download links updated successfully" });
     } else {
-      res.status(404).json({ message: "Card not found or not updated" });
+      return res.status(404).json({ message: "Card not found or not updated" });
     }
   } catch (error) {
     console.error("Error updating download links:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   } finally {
-    await client.close(); // Ensure the client is closed
+    try {
+      await client.close();
+      console.log("Database connection closed.");
+    } catch (closeError) {
+      console.error("Error closing database connection:", closeError);
+    }
   }
 }
 
