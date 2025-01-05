@@ -33,7 +33,7 @@ app.get("/fetch_card", fetchAllCards); // Fetch all cards
 
 // Route to store card information
 app.post("/store_card", postCardInfo); // Endpoint to post card information
-app.post("/deductCoins/:userId", deductCoins); // Map the route to the function
+app.post("/deductCoins/:userId", deductCoins);
 
 // Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details

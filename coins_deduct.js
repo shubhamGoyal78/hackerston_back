@@ -11,18 +11,15 @@ const client = new MongoClient(uri, {
 // Function to connect to the 'users' collection
 async function connectToUsersDb() {
   try {
-    if (!client.isConnected()) {
-      await client.connect();
-    }
+    await client.connect(); // Ensure the client is connected
     const db = client.db("Hackerston");
     return db.collection("users");
   } catch (error) {
-    console.error("Failed to connect to the database", error);
+    console.error("Failed to connect to the database:", error);
     throw error;
   }
 }
 
-// API to deduct coins
 async function deductCoins(req, res) {
   const userId = req.params.userId; // Extract userId from URL parameters
   const { amount } = req.body; // Extract deduction amount from request body
@@ -38,7 +35,7 @@ async function deductCoins(req, res) {
   try {
     const usersCollection = await connectToUsersDb();
 
-    // Find the user
+    // Find the user using `_id` (UUID as string)
     const user = await usersCollection.findOne({ _id: userId });
 
     if (!user) {
@@ -54,14 +51,14 @@ async function deductCoins(req, res) {
       });
     }
 
-    // Deduct coins using atomic operation
+    // Deduct coins using an atomic operation
     const result = await usersCollection.updateOne(
       { _id: userId },
       { $inc: { coins: -amount } }
     );
 
     if (result.modifiedCount === 1) {
-      res.status(200).json({
+      return res.status(200).json({
         message: "Coins deducted successfully",
         deducted: amount,
         remainingCoins: currentCoins - amount,
@@ -72,6 +69,9 @@ async function deductCoins(req, res) {
   } catch (error) {
     console.error("Error deducting coins:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  } finally {
+    // Close the client after the operation
+    await client.close();
   }
 }
 
