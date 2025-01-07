@@ -47,7 +47,6 @@ async function deductCoins(req, res) {
     if (currentCoins < amount) {
       return res.status(400).json({
         message: "Insufficient coins",
-        currentCoins,
       });
     }
 
@@ -61,7 +60,6 @@ async function deductCoins(req, res) {
       return res.status(200).json({
         message: "Coins deducted successfully",
         deducted: amount,
-        remainingCoins: currentCoins - amount,
       });
     } else {
       throw new Error("Failed to deduct coins");
