@@ -26,10 +26,10 @@ async function connectToAppThumbnailDb() {
   return appThumbnailCollection;
 }
 
-async function fetchAppDetails(req, res) {
+async function fetchAppInfo(req, res) {
   try {
     const { id } = req.params;
-    console.log("🔍 Fetching App Details for ID:", id);
+    console.log("🔍 Fetching App Info for ID:", id);
 
     if (!ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid ID format" });
@@ -37,25 +37,25 @@ async function fetchAppDetails(req, res) {
 
     const appThumbnailCollection = await connectToAppThumbnailDb();
 
-    // Fetch full app details, not just the thumbnail
-    const appDetails = await appThumbnailCollection.findOne({
+    // Fetch full app details by `_id`
+    const appInfo = await appThumbnailCollection.findOne({
       _id: new ObjectId(id),
     });
 
-    if (!appDetails) {
-      console.warn("⚠️ App Details Not Found:", id);
-      return res.status(404).json({ message: "App details not found" });
+    if (!appInfo) {
+      console.warn("⚠️ App Info Not Found:", id);
+      return res.status(404).json({ message: "App info not found" });
     }
 
-    console.log("✅ App Details Found:", appDetails);
+    console.log("✅ App Info Found:", appInfo);
     res.status(200).json({
-      message: "App details fetched successfully",
-      app_details: appDetails, // Returning full details
+      message: "App info fetched successfully",
+      app_info: appInfo, // Returning full details
     });
   } catch (error) {
-    console.error("❌ Error fetching app details:", error);
+    console.error("❌ Error fetching app info:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-module.exports = { fetchAppDetails };
+module.exports = { fetchAppInfo };
