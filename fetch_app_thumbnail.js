@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
@@ -26,36 +26,29 @@ async function connectToAppDetailsDb() {
   return appDetailsCollection;
 }
 
-async function fetchAppInfo(req, res) {
+async function fetchAllAppInfo(req, res) {
   try {
-    const { id } = req.params;
-    console.log("🔍 Fetching App Details for ID:", id);
-
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
+    console.log("🔍 Fetching All App Details");
 
     const appDetailsCollection = await connectToAppDetailsDb();
 
-    // Fetch full app details by `_id`
-    const appInfo = await appDetailsCollection.findOne({
-      _id: new ObjectId(id),
-    });
+    // Fetch all documents from the collection
+    const allApps = await appDetailsCollection.find({}).toArray();
 
-    if (!appInfo) {
-      console.warn("⚠️ App Details Not Found:", id);
-      return res.status(404).json({ message: "App details not found" });
+    if (!allApps || allApps.length === 0) {
+      console.warn("⚠️ No App Details Found");
+      return res.status(404).json({ message: "No app details found" });
     }
 
-    console.log("✅ App Details Found:", appInfo);
+    console.log("✅ App Details Fetched Successfully");
     res.status(200).json({
       message: "App details fetched successfully",
-      app_info: appInfo, // Returning full details
+      apps: allApps, // Returning all app details
     });
   } catch (error) {
-    console.error("❌ Error fetching app details:", error);
+    console.error("❌ Error fetching all app details:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-module.exports = { fetchAppInfo };
+module.exports = { fetchAllAppInfo };
