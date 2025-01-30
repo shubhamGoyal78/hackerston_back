@@ -20,23 +20,26 @@ async function connectToAppDetailsDb() {
 
 async function postAppDetails(req, res) {
   try {
-    const { title, coins } = req.body;
+    const { steps, downloadLink, screenshotLink, referralCode } = req.body;
 
-    if (!title || !coins) {
-      return res.status(400).json({ message: "Title and coins are required" });
+    if (!steps || !downloadLink || !referralCode) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (typeof coins !== "number" || coins < 0) {
+    // Ensure that 'steps' is an array of strings
+    if (!Array.isArray(steps) || steps.length === 0) {
       return res
         .status(400)
-        .json({ message: "Coins must be a positive number" });
+        .json({ message: "Steps must be a non-empty array" });
     }
 
     const appDetailsCollection = await connectToAppDetailsDb();
 
     const newAppDetails = {
-      title,
-      coins,
+      steps,
+      downloadLink,
+      screenshotLink,
+      referralCode,
       createdAt: new Date(),
     };
 
