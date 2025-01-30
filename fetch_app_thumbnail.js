@@ -17,7 +17,7 @@ async function connectToAppDetailsDb() {
       await client.connect();
       console.log("✅ Connected to MongoDB");
       const db = client.db("Hackerston");
-      appDetailsCollection = db.collection("app_details");
+      appDetailsCollection = db.collection("app_thumbnails");
     } catch (error) {
       console.error("❌ Failed to connect to the database", error);
       throw error;
