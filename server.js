@@ -15,6 +15,7 @@ const { fetchCoins } = require("./fetch_coins");
 const { addCoins } = require("./get_coin");
 const { fetchDownloadCoins } = require("./fetch_download_coins"); // Import fetchDownloadCoins function
 const { deductCoins } = require("./coins_deduct"); // Import the deductCoins function
+const { postAppDetails } = require("./post_app_details"); // Adjust the path as needed
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -34,6 +35,7 @@ app.get("/fetch_card", fetchAllCards); // Fetch all cards
 // Route to store card information
 app.post("/store_card", postCardInfo); // Endpoint to post card information
 app.post("/deductCoins/:userId", deductCoins);
+app.post("/app-details", postAppDetails);
 
 // Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
