@@ -18,6 +18,7 @@ const { deductCoins } = require("./coins_deduct"); // Import the deductCoins fun
 const { postAppDetails } = require("./post_app_details"); // Adjust the path as needed
 const { fetchAppDetails } = require("./fetch_app_details"); // The newly created fetchAppDetails function
 const { postAppThumbnail } = require("./post_app_thumbnail"); // Import the new function
+const { fetchAppThumbnail } = require("./fetch_app_thumbnail"); // Adjust the path as needed
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ app.post("/deductCoins/:userId", deductCoins);
 app.post("/app-details", postAppDetails);
 app.get("/app-details/:id", fetchAppDetails);
 app.post("/app-thumbnail", postAppThumbnail); // New route for posting app thumbnails
+app.get("/app-thumbnail/:id", fetchAppThumbnail); // Fetch app thumbnail by _id
 
 // Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
