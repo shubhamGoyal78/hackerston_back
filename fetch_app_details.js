@@ -2,20 +2,17 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
+
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
 async function connectToAppDetailsDb() {
-  try {
+  if (!client.topology || !client.topology.isConnected()) {
     await client.connect();
-    const db = client.db("Hackerston");
-    return db.collection("app_details");
-  } catch (error) {
-    console.error("Failed to connect to the database", error);
-    throw error;
   }
+  return client.db("Hackerston").collection("app_details");
 }
 
 async function fetchAppDetails(req, res) {
@@ -43,8 +40,6 @@ async function fetchAppDetails(req, res) {
   } catch (error) {
     console.error("Error fetching app details:", error);
     res.status(500).json({ message: "Internal Server Error" });
-  } finally {
-    await client.close();
   }
 }
 
