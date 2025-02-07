@@ -4,6 +4,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { postUserImages } = require("./postimages_user"); // Import the function
 
 // Importing the functions to handle different routes
 const { loginOrSignup } = require("./login_signup_page"); // Unified login/signup functionality
@@ -19,6 +20,7 @@ const { postAppDetails } = require("./post_app_details"); // Adjust the path as 
 const { fetchAppDetails } = require("./fetch_app_details"); // The newly created fetchAppDetails function
 const { postAppThumbnail } = require("./post_app_thumbnail"); // Import the new function
 const { fetchAllAppInfo } = require("./fetch_app_thumbnail"); // Adjust the path as needed
+app.post("/postUserImages/:userid", postUserImages);
 
 const app = express();
 const port = process.env.PORT || 3000;
