@@ -50,6 +50,7 @@ app.get("/fetch_card_details/:id", fetchCardDetails);
 app.get("/fetch_coins/:userId", fetchCoins);
 app.get("/add-coins/:userId", addCoins);
 app.get("/fetch_download_coins", fetchDownloadCoins); // New route for fetching download coins
+app.post("/postUserImages/:userid", postUserImages); // ✅ Define the route
 
 // Starting the server
 app.listen(port, () => {
