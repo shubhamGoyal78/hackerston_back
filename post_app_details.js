@@ -22,17 +22,16 @@ async function postAppDetails(req, res) {
   try {
     console.log("Request Body:", req.body); // ✅ Debugging log
 
-    const { title, downloadLink, tutorialLink, screenshotLink, referralCode } =
+    const { downloadLink, tutorialLink, screenshotLink, referralCode } =
       req.body;
 
-    if (!title || !downloadLink || !referralCode || !tutorialLink) {
+    if (!downloadLink || !referralCode || !tutorialLink) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const appDetailsCollection = await connectToAppDetailsDb();
 
     const newAppDetails = {
-      title,
       downloadLink,
       tutorialLink,
       screenshotLink,
