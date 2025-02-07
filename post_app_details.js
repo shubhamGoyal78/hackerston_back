@@ -20,31 +20,19 @@ async function connectToAppDetailsDb() {
 
 async function postAppDetails(req, res) {
   try {
-    console.log("Request Body:", req.body); // ✅ Log request body to debug
+    console.log("Request Body:", req.body); // ✅ Debugging log
 
-    const {
-      title,
-      steps,
-      downloadLink,
-      tutorialLink,
-      screenshotLink,
-      referralCode,
-    } = req.body;
+    const { title, downloadLink, tutorialLink, screenshotLink, referralCode } =
+      req.body;
 
-    if (!title || !steps || !downloadLink || !referralCode || !tutorialLink) {
+    if (!title || !downloadLink || !referralCode || !tutorialLink) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (!Array.isArray(steps) || steps.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Steps must be a non-empty array" });
-    }
-
     const appDetailsCollection = await connectToAppDetailsDb();
+
     const newAppDetails = {
       title,
-      steps,
       downloadLink,
       tutorialLink,
       screenshotLink,
