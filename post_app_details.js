@@ -22,8 +22,7 @@ async function postAppDetails(req, res) {
   try {
     console.log("Request Body:", req.body); // ✅ Debugging log
 
-    const { downloadLink, tutorialLink, screenshotLink, referralCode } =
-      req.body;
+    const { downloadLink, tutorialLink, referralCode } = req.body;
 
     if (!downloadLink || !referralCode || !tutorialLink) {
       return res.status(400).json({ message: "All fields are required" });
@@ -34,7 +33,6 @@ async function postAppDetails(req, res) {
     const newAppDetails = {
       downloadLink,
       tutorialLink,
-      screenshotLink,
       referralCode,
       createdAt: new Date(),
     };
