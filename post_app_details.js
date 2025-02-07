@@ -20,6 +20,8 @@ async function connectToAppDetailsDb() {
 
 async function postAppDetails(req, res) {
   try {
+    console.log("Request Body:", req.body); // ✅ Log request body to debug
+
     const {
       title,
       steps,
@@ -29,12 +31,10 @@ async function postAppDetails(req, res) {
       referralCode,
     } = req.body;
 
-    // Validate that all required fields are provided
     if (!title || !steps || !downloadLink || !referralCode || !tutorialLink) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Ensure that 'steps' is an array of strings
     if (!Array.isArray(steps) || steps.length === 0) {
       return res
         .status(400)
@@ -42,12 +42,11 @@ async function postAppDetails(req, res) {
     }
 
     const appDetailsCollection = await connectToAppDetailsDb();
-
     const newAppDetails = {
       title,
       steps,
       downloadLink,
-      tutorialLink, // New field added
+      tutorialLink,
       screenshotLink,
       referralCode,
       createdAt: new Date(),
