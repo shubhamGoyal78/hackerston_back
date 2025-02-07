@@ -20,11 +20,17 @@ async function connectToAppDetailsDb() {
 
 async function postAppDetails(req, res) {
   try {
-    const { title, steps, downloadLink, screenshotLink, referralCode } =
-      req.body;
+    const {
+      title,
+      steps,
+      downloadLink,
+      tutorialLink,
+      screenshotLink,
+      referralCode,
+    } = req.body;
 
     // Validate that all required fields are provided
-    if (!title || !steps || !downloadLink || !referralCode) {
+    if (!title || !steps || !downloadLink || !referralCode || !tutorialLink) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -38,9 +44,10 @@ async function postAppDetails(req, res) {
     const appDetailsCollection = await connectToAppDetailsDb();
 
     const newAppDetails = {
-      title, // Add title field here
+      title,
       steps,
       downloadLink,
+      tutorialLink, // New field added
       screenshotLink,
       referralCode,
       createdAt: new Date(),
