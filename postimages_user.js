@@ -27,24 +27,33 @@ async function postUserImages(req, res) {
     const { image_links } = req.body;
 
     if (!userid || !Array.isArray(image_links) || image_links.length === 0) {
-      return res
-        .status(400)
-        .json({
-          message: "userid (in URL) and image_links array are required",
-        });
+      return res.status(400).json({
+        message: "userid (in URL) and image_links array are required",
+      });
     }
 
     const usersCollection = await connectToUsersDb();
 
-    const updatedUser = await usersCollection.findOneAndUpdate(
-      { _id: userid }, // Find by userid
-      { $push: { image_link: { $each: image_links } } }, // Push multiple images
-      { returnDocument: "after" }
-    );
+    // Convert userid to ObjectId only if necessary
+    let userQuery = { _id: userid };
+    try {
+      userQuery = { _id: new ObjectId(userid) }; // Try to convert
+    } catch (err) {
+      console.warn("User ID is not an ObjectId, using string instead.");
+    }
 
-    if (!updatedUser.value) {
+    const userExists = await usersCollection.findOne(userQuery);
+    console.log("User Found:", userExists); // Debugging log
+
+    if (!userExists) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    const updatedUser = await usersCollection.findOneAndUpdate(
+      userQuery,
+      { $push: { image_link: { $each: image_links } } },
+      { returnDocument: "after" }
+    );
 
     res.status(200).json({
       message: "Images added successfully!",
