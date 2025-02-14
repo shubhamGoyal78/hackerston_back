@@ -5,6 +5,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { postUserImages } = require("./postimages_user"); // Import the function
+const { addOneCoin } = require("./add_one_coins");
 
 // Importing the functions to handle different routes
 const { loginOrSignup } = require("./login_signup_page"); // Unified login/signup functionality
@@ -51,6 +52,7 @@ app.get("/fetch_coins/:userId", fetchCoins);
 app.get("/add-coins/:userId", addCoins);
 app.get("/fetch_download_coins", fetchDownloadCoins); // New route for fetching download coins
 app.post("/postUserImages/:userid", postUserImages); // ✅ Define the route
+app.post("/add-one-coin/:userId", addOneCoin);
 
 // Starting the server
 app.listen(port, () => {
