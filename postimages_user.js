@@ -53,10 +53,16 @@ async function postUserImages(req, res) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Create the image group structure
+    // Get current date and time in IST
+    const istDateTime = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
+
+    // Create the image group structure with timestamp
     const imageGroup = {
       title,
       images: image_links,
+      timestamp: istDateTime, // Saving the timestamp
     };
 
     const updatedUser = await usersCollection.findOneAndUpdate(
