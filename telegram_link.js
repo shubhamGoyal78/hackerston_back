@@ -19,11 +19,21 @@ async function fetchTelegramLink(req, res) {
   try {
     const telegramLinkCollection = await connectToTelegramLinkDb();
 
-    // Assuming there's only one document in the collection
+    // Fetch the first document from the collection
     const telegramLink = await telegramLinkCollection.findOne({});
 
-    if (!telegramLink || !telegramLink.correct_url) {
-      return res.status(404).json({ message: "Telegram link not found" });
+    console.log("Fetched Telegram Link Document:", telegramLink); // Debugging
+
+    if (!telegramLink) {
+      return res
+        .status(404)
+        .json({ message: "No document found in telegram_link collection" });
+    }
+
+    if (!telegramLink.correct_url) {
+      return res
+        .status(404)
+        .json({ message: "correct_url field is missing in the document" });
     }
 
     res.status(200).json({
