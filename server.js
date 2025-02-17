@@ -55,6 +55,7 @@ app.get("/fetch_download_coins", fetchDownloadCoins); // New route for fetching 
 app.post("/postUserImages/:userid", postUserImages); // ✅ Define the route
 app.post("/add-one-coin/:userId", addOneCoin);
 app.get("/api/telegram-link", fetchTelegramLink);
+app.get("/api/playstore-link", fetchTelegramLink);
 
 // Starting the server
 app.listen(port, () => {
