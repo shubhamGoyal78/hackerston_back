@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
-const { v4: uuidv4 } = require("uuid"); // UUID library for generating unique IDs
+const { v4: uuidv4 } = require("uuid"); // UUID for unique IDs
+const crypto = require("crypto"); // For generating referral code
 
 // MongoDB connection URI and client setup
 const uri =
@@ -19,6 +20,11 @@ async function connectToCardDetailsDb() {
     console.error("Failed to connect to the database", error);
     throw error;
   }
+}
+
+// Function to generate a 7-character referral code
+function generateReferralCode() {
+  return crypto.randomBytes(4).toString("hex").slice(0, 7).toUpperCase(); // 7-character alphanumeric
 }
 
 // Function to post card details
@@ -50,11 +56,15 @@ async function postCardDetails(req, res) {
 
     const cardDetailsCollection = await connectToCardDetailsDb(); // Connect to 'card_details' collection
 
+    // Generate a referral code
+    const referralCode = generateReferralCode();
+
     // Create a new card details object
     const newCardDetails = {
       working_video_link,
       download_links: processedDownloadLinks,
       apply_video_link,
+      referral_code: referralCode, // Add referral code
       createdAt: new Date(),
     };
 
