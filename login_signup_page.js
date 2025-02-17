@@ -1,5 +1,5 @@
 const { MongoClient } = require("mongodb");
-const { v4: uuidv4 } = require("uuid"); // Import uuid for generating unique IDs
+const { v4: uuidv4 } = require("uuid"); // Import UUID for unique user ID
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
@@ -20,12 +20,34 @@ async function connectToDb() {
   }
 }
 
+// Function to generate a unique 7-character alphanumeric referral code
+async function generateReferralCode(usersCollection) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let referralCode;
+  let isUnique = false;
+
+  while (!isUnique) {
+    referralCode = Array.from(
+      { length: 7 },
+      () => characters[Math.floor(Math.random() * characters.length)]
+    ).join("");
+    const existingUser = await usersCollection.findOne({
+      referral_code: referralCode,
+    });
+    if (!existingUser) {
+      isUnique = true; // Ensure the referral code is unique
+    }
+  }
+
+  return referralCode;
+}
+
 // Function to handle both login and signup
 async function loginOrSignup(req, res) {
   try {
     const { email } = req.body; // Extract email from request body
 
-    // Validate input fields
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
     }
@@ -36,16 +58,24 @@ async function loginOrSignup(req, res) {
     let user = await usersCollection.findOne({ email });
 
     if (user) {
-      // If user exists, log them in and return their _id
+      // If user exists, log them in and return their details
       return res.status(200).json({
         message: "Login successful",
-        user: { _id: user._id, email: user.email },
+        user: {
+          _id: user._id,
+          email: user.email,
+          referral_code: user.referral_code,
+        },
       });
     } else {
-      // If user does not exist, register them
+      // Generate a unique referral code for the new user
+      const referralCode = await generateReferralCode(usersCollection);
+
+      // Create a new user object
       const newUser = {
         _id: uuidv4(), // Generate a unique ID for the new user
         email,
+        referral_code: referralCode, // Assign the referral code
         createdAt: new Date(), // Add a timestamp
       };
 
@@ -54,7 +84,11 @@ async function loginOrSignup(req, res) {
 
       return res.status(201).json({
         message: "User registered successfully",
-        user: { _id: newUser._id, email: newUser.email },
+        user: {
+          _id: newUser._id,
+          email: newUser.email,
+          referral_code: newUser.referral_code,
+        },
       });
     }
   } catch (error) {
