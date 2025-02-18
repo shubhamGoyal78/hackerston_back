@@ -23,6 +23,7 @@ const { postAppDetails } = require("./post_app_details"); // Adjust the path as 
 const { fetchAppDetails } = require("./fetch_app_details"); // The newly created fetchAppDetails function
 const { postAppThumbnail } = require("./post_app_thumbnail"); // Import the new function
 const { fetchAllAppInfo } = require("./fetch_app_thumbnail"); // Adjust the path as needed
+const { applyReferralCode } = require("./apply_code"); // Adjust the path as needed
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -47,7 +48,6 @@ app.get("/app-details/:id", fetchAppDetails);
 app.post("/app-thumbnail", postAppThumbnail); // New route for posting app thumbnails
 app.get("/api/apps", fetchAllAppInfo);
 
-// Route to post card details (for working_video_link, download_links, etc.)
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
 app.get("/fetch_card_details/:id", fetchCardDetails);
 app.get("/fetch_coins/:userId", fetchCoins);
@@ -57,6 +57,7 @@ app.post("/postUserImages/:userid", postUserImages); // ✅ Define the route
 app.post("/add-one-coin/:userId", addOneCoin);
 app.get("/api/telegram-link", fetchTelegramLink);
 app.get("/api/playstore-link", fetchPlaystoreLink);
+app.get("/apply-code/:userId", applyReferralCode);
 
 // Starting the server
 app.listen(port, () => {
