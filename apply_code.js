@@ -67,6 +67,19 @@ async function applyReferralCode(req, res) {
       }
     );
 
+    // Increment referrals_count of the referral user by 1
+    await usersCollection.updateOne(
+      { _id: referralUser._id },
+      {
+        $inc: { referrals_count: 1 }, // Increment referrals_count by 1
+      }
+    );
+
+    // Fetch updated referral user data
+    const updatedReferralUser = await usersCollection.findOne({
+      _id: referralUser._id,
+    });
+
     return res.status(200).json({
       message: "Coupon code applied successfully",
       user: {
@@ -74,6 +87,10 @@ async function applyReferralCode(req, res) {
         email: user.email,
         apply_coupon,
         referral_user: referralUser._id, // Returning referral user ID in response
+      },
+      referral_user: {
+        _id: updatedReferralUser._id,
+        referrals_count: updatedReferralUser.referrals_count, // Updated referrals_count
       },
     });
   } catch (error) {
