@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
@@ -33,11 +33,8 @@ async function applyReferralCode(req, res) {
 
     const usersCollection = await connectToDb();
 
-    // Convert userId to ObjectId
-    const userObjectId = new ObjectId(userId);
-
     // Check if the user exists
-    const user = await usersCollection.findOne({ _id: userObjectId });
+    const user = await usersCollection.findOne({ _id: userId });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -45,7 +42,7 @@ async function applyReferralCode(req, res) {
 
     // Update only the 'apply_coupon' field without modifying others
     await usersCollection.updateOne(
-      { _id: userObjectId },
+      { _id: userId }, // Keep as a string
       { $set: { apply_coupon } }
     );
 
