@@ -19,7 +19,7 @@ async function connectToDb() {
   }
 }
 
-// Function to apply a coupon code
+// Function to apply a referral code
 async function applyReferralCode(req, res) {
   try {
     const { userId } = req.params; // Get user ID from URL
@@ -47,19 +47,24 @@ async function applyReferralCode(req, res) {
         .json({ message: "You cannot use your own referral code." });
     }
 
-    // Check if the referral code exists in any user document
-    const referralExists = await usersCollection.findOne({
+    // Check if the referral code exists and get the referral user's details
+    const referralUser = await usersCollection.findOne({
       referral_code: apply_coupon,
     });
 
-    if (!referralExists) {
+    if (!referralUser) {
       return res.status(400).json({ message: "Invalid referral code." });
     }
 
-    // Update only the 'apply_coupon' field
+    // Update the current user with the applied coupon and store the referral user's ID
     await usersCollection.updateOne(
       { _id: userId },
-      { $set: { apply_coupon } }
+      {
+        $set: {
+          apply_coupon,
+          referral_user: referralUser._id, // Storing the referral user's _id
+        },
+      }
     );
 
     return res.status(200).json({
@@ -68,6 +73,7 @@ async function applyReferralCode(req, res) {
         _id: userId,
         email: user.email,
         apply_coupon,
+        referral_user: referralUser._id, // Returning referral user ID in response
       },
     });
   } catch (error) {

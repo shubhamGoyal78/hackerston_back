@@ -65,17 +65,21 @@ async function loginOrSignup(req, res) {
           _id: user._id,
           email: user.email,
           referral_code: user.referral_code,
+          referrals_count: user.referrals_count, // Added field
+          successful_count: user.successful_count, // Added field
         },
       });
     } else {
       // Generate a unique referral code for the new user
       const referralCode = await generateReferralCode(usersCollection);
 
-      // Create a new user object
+      // Create a new user object with additional fields
       const newUser = {
         _id: uuidv4(), // Generate a unique ID for the new user
         email,
         referral_code: referralCode, // Assign the referral code
+        referrals_count: 0, // Initialize referral count
+        successful_count: 0, // Initialize successful referral count
         createdAt: new Date(), // Add a timestamp
       };
 
@@ -88,6 +92,8 @@ async function loginOrSignup(req, res) {
           _id: newUser._id,
           email: newUser.email,
           referral_code: newUser.referral_code,
+          referrals_count: newUser.referrals_count, // Added field
+          successful_count: newUser.successful_count, // Added field
         },
       });
     }
