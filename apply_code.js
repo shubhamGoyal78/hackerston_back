@@ -33,16 +33,32 @@ async function applyReferralCode(req, res) {
 
     const usersCollection = await connectToDb();
 
-    // Check if the user exists
+    // Fetch user details
     const user = await usersCollection.findOne({ _id: userId });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update only the 'apply_coupon' field without modifying others
+    // Prevent user from using their own referral code
+    if (user.referral_code === apply_coupon) {
+      return res
+        .status(400)
+        .json({ message: "You cannot use your own referral code." });
+    }
+
+    // Check if the referral code exists in any user document
+    const referralExists = await usersCollection.findOne({
+      referral_code: apply_coupon,
+    });
+
+    if (!referralExists) {
+      return res.status(400).json({ message: "Invalid referral code." });
+    }
+
+    // Update only the 'apply_coupon' field
     await usersCollection.updateOne(
-      { _id: userId }, // Keep as a string
+      { _id: userId },
       { $set: { apply_coupon } }
     );
 
@@ -51,7 +67,7 @@ async function applyReferralCode(req, res) {
       user: {
         _id: userId,
         email: user.email,
-        apply_coupon, // Only this field is updated
+        apply_coupon,
       },
     });
   } catch (error) {
