@@ -57,9 +57,8 @@ app.post("/postUserImages/:userid", postUserImages); // ✅ Define the route
 app.post("/add-one-coin/:userId", addOneCoin);
 app.get("/api/telegram-link", fetchTelegramLink);
 app.get("/api/playstore-link", fetchPlaystoreLink);
-app.post("/apply-code/:userId", applyReferralCode);
+app.post("/apply-coupon/:userId", applyReferralCode);
 
-// Starting the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

@@ -7,64 +7,61 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
+// Function to connect to the 'users' collection
 async function connectToDb() {
-  await client.connect();
-  const db = client.db("Hackerston");
-  return db.collection("users");
+  try {
+    await client.connect();
+    const db = client.db("Hackerston");
+    return db.collection("users");
+  } catch (error) {
+    console.error("Failed to connect to the database", error);
+    throw error;
+  }
 }
 
+// Function to apply a coupon code
 async function applyReferralCode(req, res) {
   try {
-    const { userId } = req.params;
-    const { referralCode } = req.body; // This is the referral code the user enters (friend's code)
+    const { userId } = req.params; // Get user ID from URL
+    const { apply_coupon } = req.body; // Get coupon code from request body
 
-    if (!userId || !referralCode) {
+    if (!userId || !apply_coupon) {
       return res
         .status(400)
-        .json({ message: "User ID and referral code are required" });
+        .json({ message: "User ID and coupon code are required" });
     }
 
     const usersCollection = await connectToDb();
 
+    // Convert userId to ObjectId
+    const userObjectId = new ObjectId(userId);
+
     // Check if the user exists
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await usersCollection.findOne({ _id: userObjectId });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Ensure the user is not applying their own referral code
-    if (user.referral_code === referralCode) {
-      return res
-        .status(400)
-        .json({ message: "You cannot use your own referral code." });
-    }
-
-    // Check if the referral code exists in the database (must belong to another user)
-    const referrer = await usersCollection.findOne({
-      referral_code: referralCode,
-    });
-    if (!referrer) {
-      return res.status(400).json({ message: "Invalid referral code." });
-    }
-
-    // Update the user's document to include the applied referral code
+    // Update only the 'apply_coupon' field without modifying others
     await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { apply_code: referralCode } }
+      { _id: userObjectId },
+      { $set: { apply_coupon } }
     );
 
     return res.status(200).json({
-      message: "Referral code applied successfully",
+      message: "Coupon code applied successfully",
       user: {
         _id: userId,
         email: user.email,
-        referral_code: user.referral_code, // User's own referral code
-        apply_code: referralCode, // Code they applied (friend's referral code)
+        apply_coupon, // Only this field is updated
       },
     });
   } catch (error) {
-    console.error("Error applying referral code:", error);
+    console.error("Error applying coupon code:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  } finally {
+    await client.close();
   }
 }
 
