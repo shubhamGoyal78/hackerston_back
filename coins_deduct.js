@@ -57,9 +57,31 @@ async function deductCoins(req, res) {
     );
 
     if (result.modifiedCount === 1) {
+      let referralUserUpdated = null;
+
+      // Check if deduction is above 40 and user has a referral_user
+      if (amount > 40 && user.referral_user) {
+        // Increment successful_count of referral user by 1
+        await usersCollection.updateOne(
+          { _id: user.referral_user },
+          { $inc: { successful_count: 1 } }
+        );
+
+        // Fetch updated referral user data
+        referralUserUpdated = await usersCollection.findOne({
+          _id: user.referral_user,
+        });
+      }
+
       return res.status(200).json({
         message: "Coins deducted successfully",
         deducted: amount,
+        referral_user: referralUserUpdated
+          ? {
+              _id: referralUserUpdated._id,
+              successful_count: referralUserUpdated.successful_count, // Updated successful_count
+            }
+          : null,
       });
     } else {
       throw new Error("Failed to deduct coins");
