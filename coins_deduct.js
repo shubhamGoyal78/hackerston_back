@@ -35,7 +35,7 @@ async function deductCoins(req, res) {
   try {
     const usersCollection = await connectToUsersDb();
 
-    // Find the user using `_id` (UUID as string)
+    // Find the user using `_id`
     const user = await usersCollection.findOne({ _id: userId });
 
     if (!user) {
@@ -45,9 +45,7 @@ async function deductCoins(req, res) {
     const currentCoins = user.coins || 0;
 
     if (currentCoins < amount) {
-      return res.status(400).json({
-        message: "Insufficient coins",
-      });
+      return res.status(400).json({ message: "Insufficient coins" });
     }
 
     // Deduct coins using an atomic operation
@@ -61,16 +59,25 @@ async function deductCoins(req, res) {
 
       // Check if deduction is above 40 and user has a referral_user
       if (amount > 40 && user.referral_user) {
-        // Increment successful_count of referral user by 1
-        await usersCollection.updateOne(
-          { _id: user.referral_user },
-          { $inc: { successful_count: 1 } }
-        );
+        // Ensure referral is only counted once
+        if (!user.referral_successful) {
+          // Increment successful_count of referral user by 1
+          await usersCollection.updateOne(
+            { _id: user.referral_user },
+            { $inc: { successful_count: 1 } }
+          );
 
-        // Fetch updated referral user data
-        referralUserUpdated = await usersCollection.findOne({
-          _id: user.referral_user,
-        });
+          // Mark this user's referral as successful
+          await usersCollection.updateOne(
+            { _id: userId },
+            { $set: { referral_successful: true } }
+          );
+
+          // Fetch updated referral user data
+          referralUserUpdated = await usersCollection.findOne({
+            _id: user.referral_user,
+          });
+        }
       }
 
       return res.status(200).json({
@@ -79,7 +86,7 @@ async function deductCoins(req, res) {
         referral_user: referralUserUpdated
           ? {
               _id: referralUserUpdated._id,
-              successful_count: referralUserUpdated.successful_count, // Updated successful_count
+              successful_count: referralUserUpdated.successful_count,
             }
           : null,
       });
