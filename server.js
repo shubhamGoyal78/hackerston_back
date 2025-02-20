@@ -25,6 +25,7 @@ const { postAppThumbnail } = require("./post_app_thumbnail"); // Import the new 
 const { fetchAllAppInfo } = require("./fetch_app_thumbnail"); // Adjust the path as needed
 const { applyReferralCode } = require("./apply_code"); // Adjust the path as needed
 const { checkAppliedCoupon } = require("./check_apply_coupon");
+const { fetchReferDetails } = require("./fetch_referdetails");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -60,6 +61,7 @@ app.get("/api/telegram-link", fetchTelegramLink);
 app.get("/api/playstore-link", fetchPlaystoreLink);
 app.post("/apply-coupon/:userId", applyReferralCode);
 app.get("/check-coupon/:userId", checkAppliedCoupon);
+app.get("/fetch_referdetails/:userId", fetchReferDetails);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
