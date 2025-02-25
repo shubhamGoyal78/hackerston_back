@@ -31,20 +31,28 @@ async function fetchAllAppInfo(req, res) {
     console.log("🔍 Fetching All App Details");
 
     const appDetailsCollection = await connectToAppDetailsDb();
+    const usersCollection = await connectToUsersDb();
 
-    // Fetch all documents from the collection
-    const allApps = await appDetailsCollection.find({}).toArray();
+    const userId = req.query.userId; // Pass user ID as a query param
+    let blockedApps = [];
 
-    if (!allApps || allApps.length === 0) {
-      console.warn("⚠️ No App Details Found");
+    if (userId) {
+      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+      blockedApps = user?.blockedApps || [];
+    }
+
+    // Fetch all apps except blocked ones
+    const allApps = await appDetailsCollection
+      .find({ _id: { $nin: blockedApps.map((id) => new ObjectId(id)) } })
+      .toArray();
+
+    if (!allApps.length) {
       return res.status(404).json({ message: "No app details found" });
     }
 
-    console.log("✅ App Details Fetched Successfully");
-    res.status(200).json({
-      message: "App details fetched successfully",
-      apps: allApps, // Returning all app details
-    });
+    res
+      .status(200)
+      .json({ message: "App details fetched successfully", apps: allApps });
   } catch (error) {
     console.error("❌ Error fetching all app details:", error);
     res.status(500).json({ message: "Internal Server Error" });
