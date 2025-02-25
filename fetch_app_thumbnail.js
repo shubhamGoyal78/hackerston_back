@@ -1,13 +1,14 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
 
 let client;
 let appDetailsCollection;
+let usersCollection;
 
 // Connect only once and reuse the connection
-async function connectToAppDetailsDb() {
+async function connectToDatabases() {
   if (!client) {
     try {
       client = new MongoClient(uri, {
@@ -18,32 +19,39 @@ async function connectToAppDetailsDb() {
       console.log("✅ Connected to MongoDB");
       const db = client.db("Hackerston");
       appDetailsCollection = db.collection("app_thumbnails");
+      usersCollection = db.collection("users");
     } catch (error) {
       console.error("❌ Failed to connect to the database", error);
       throw error;
     }
   }
-  return appDetailsCollection;
+  return { appDetailsCollection, usersCollection };
 }
 
 async function fetchAllAppInfo(req, res) {
   try {
     console.log("🔍 Fetching All App Details");
 
-    const appDetailsCollection = await connectToAppDetailsDb();
-    const usersCollection = await connectToUsersDb();
+    const { appDetailsCollection, usersCollection } =
+      await connectToDatabases();
+    const userId = req.query.userId;
 
-    const userId = req.query.userId; // Pass user ID as a query param
     let blockedApps = [];
 
     if (userId) {
-      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+      // Fetch the user and blocked apps
+      const user = await usersCollection.findOne({ _id: userId });
       blockedApps = user?.blockedApps || [];
     }
 
+    // Convert blockedApps to ObjectId if necessary
+    const blockedAppIds = blockedApps.map((id) =>
+      ObjectId.isValid(id) ? new ObjectId(id) : id
+    );
+
     // Fetch all apps except blocked ones
     const allApps = await appDetailsCollection
-      .find({ _id: { $nin: blockedApps.map((id) => new ObjectId(id)) } })
+      .find({ _id: { $nin: blockedAppIds } })
       .toArray();
 
     if (!allApps.length) {

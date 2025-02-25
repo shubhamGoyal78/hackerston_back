@@ -6,7 +6,7 @@ const uri =
 let client;
 let usersCollection;
 
-// Connect to MongoDB
+// Connect to MongoDB (Singleton Pattern)
 async function connectToUsersDb() {
   if (!client) {
     try {
@@ -39,9 +39,19 @@ async function blockApp(req, res) {
 
     const usersCollection = await connectToUsersDb();
 
+    // Check if the user exists
+    const user = await usersCollection.findOne({ _id: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Convert appId to ObjectId only if it's stored as ObjectId in DB
+    const appIdToStore = ObjectId.isValid(appId) ? new ObjectId(appId) : appId;
+
+    // Update user document by adding appId to blockedApps array
     await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $addToSet: { blockedApps: appId } } // Prevents duplicate entries
+      { _id: userId },
+      { $addToSet: { blockedApps: appIdToStore } }
     );
 
     res.status(200).json({ message: "App blocked successfully" });
