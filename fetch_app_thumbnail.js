@@ -16,12 +16,10 @@ async function connectToDatabases() {
         useUnifiedTopology: true,
       });
       await client.connect();
-      console.log("✅ Connected to MongoDB");
       const db = client.db("Hackerston");
       appDetailsCollection = db.collection("app_thumbnails");
       usersCollection = db.collection("users");
     } catch (error) {
-      console.error("❌ Failed to connect to the database", error);
       throw error;
     }
   }
@@ -30,8 +28,6 @@ async function connectToDatabases() {
 
 async function fetchAllAppInfo(req, res) {
   try {
-    console.log("🔍 Fetching All App Details");
-
     const { appDetailsCollection, usersCollection } =
       await connectToDatabases();
     const { userId } = req.query;
@@ -39,13 +35,11 @@ async function fetchAllAppInfo(req, res) {
     let blockedApps = [];
 
     if (userId) {
-      // Convert userId to ObjectId if necessary
       let userQuery = { _id: userId };
       if (ObjectId.isValid(userId)) {
         userQuery._id = new ObjectId(userId);
       }
 
-      // Fetch the user and blocked apps
       const user = await usersCollection.findOne(userQuery);
 
       if (user && user.blockedApps) {
@@ -55,9 +49,6 @@ async function fetchAllAppInfo(req, res) {
       }
     }
 
-    console.log("Blocked App IDs for User:", blockedApps); // Debugging
-
-    // Fetch all apps except blocked ones
     const allApps = await appDetailsCollection
       .find({ _id: { $nin: blockedApps } })
       .toArray();
@@ -70,7 +61,6 @@ async function fetchAllAppInfo(req, res) {
       .status(200)
       .json({ message: "App details fetched successfully", apps: allApps });
   } catch (error) {
-    console.error("❌ Error fetching all app details:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
