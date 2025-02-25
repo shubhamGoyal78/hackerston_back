@@ -43,10 +43,10 @@ async function fetchAllAppInfo(req, res) {
       blockedApps = user?.blockedApps || [];
     }
 
-    // Ensure all blocked app IDs are properly converted to ObjectId if needed
-    const blockedAppIds = blockedApps.map((id) =>
-      ObjectId.isValid(id) ? new ObjectId(id) : id
-    );
+    // Convert blockedApps to ObjectId only if they are not already in ObjectId format
+    const blockedAppIds = blockedApps.map((id) => new ObjectId(id));
+
+    console.log("Blocked App IDs:", blockedAppIds); // Debugging
 
     // Fetch all apps except blocked ones
     const allApps = await appDetailsCollection
