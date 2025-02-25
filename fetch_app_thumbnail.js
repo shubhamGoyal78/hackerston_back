@@ -39,12 +39,14 @@ async function fetchAllAppInfo(req, res) {
     let blockedApps = [];
 
     if (userId) {
-      const user = await usersCollection.findOne({ _id: userId });
+      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
       blockedApps = user?.blockedApps || [];
     }
 
-    // Ensure all blocked app IDs are converted to ObjectId
-    const blockedAppIds = blockedApps.map((id) => new ObjectId(id));
+    // Ensure all blocked app IDs are properly converted to ObjectId if needed
+    const blockedAppIds = blockedApps.map((id) =>
+      ObjectId.isValid(id) ? new ObjectId(id) : id
+    );
 
     // Fetch all apps except blocked ones
     const allApps = await appDetailsCollection
