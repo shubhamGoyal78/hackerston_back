@@ -36,15 +36,24 @@ async function fetchAllAppInfo(req, res) {
       await connectToDatabases();
     const userId = req.query.userId;
 
-    let blockedApps = [];
+    let blockedAppIds = [];
 
     if (userId) {
       const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-      blockedApps = user?.blockedApps || [];
-    }
 
-    // Convert blockedApps to ObjectId only if they are not already in ObjectId format
-    const blockedAppIds = blockedApps.map((id) => new ObjectId(id));
+      if (user?.blockedApps?.length) {
+        blockedAppIds = user.blockedApps
+          .map((id) => {
+            try {
+              return new ObjectId(id);
+            } catch (error) {
+              console.warn(`⚠️ Invalid ObjectId: ${id}`);
+              return null;
+            }
+          })
+          .filter((id) => id !== null); // Remove invalid IDs
+      }
+    }
 
     console.log("Blocked App IDs:", blockedAppIds); // Debugging
 
