@@ -36,30 +36,23 @@ async function fetchAllAppInfo(req, res) {
       await connectToDatabases();
     const userId = req.query.userId;
 
-    let blockedAppIds = [];
+    let blockedApps = [];
 
     if (userId) {
-      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-
-      if (user?.blockedApps?.length) {
-        blockedAppIds = user.blockedApps
-          .map((id) => {
-            try {
-              return new ObjectId(id);
-            } catch (error) {
-              console.warn(`⚠️ Invalid ObjectId: ${id}`);
-              return null;
-            }
-          })
-          .filter((id) => id !== null); // Remove invalid IDs
-      }
+      const user = await usersCollection.findOne({ _id: userId });
+      blockedApps = user?.blockedApps || [];
     }
+
+    // Convert blockedApps to ObjectId only if they are valid ObjectIds
+    const blockedAppIds = blockedApps.map((id) =>
+      ObjectId.isValid(id) ? new ObjectId(id) : id
+    );
 
     console.log("Blocked App IDs:", blockedAppIds); // Debugging
 
     // Fetch all apps except blocked ones
     const allApps = await appDetailsCollection
-      .find({ _id: { $nin: blockedAppIds } })
+      .find({ _id: { $nin: blockedAppIds } }) // Now correctly filtering
       .toArray();
 
     if (!allApps.length) {
