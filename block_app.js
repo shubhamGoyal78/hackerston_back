@@ -39,21 +39,23 @@ async function blockApp(req, res) {
 
     const usersCollection = await connectToUsersDb();
 
-    // Convert userId to ObjectId
-    const userObjectId = new ObjectId(userId);
+    let userQuery = { _id: userId }; // Default as string
+    if (ObjectId.isValid(userId)) {
+      userQuery._id = new ObjectId(userId); // Convert only if valid
+    }
 
     // Check if the user exists
-    const user = await usersCollection.findOne({ _id: userObjectId });
+    const user = await usersCollection.findOne(userQuery);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Convert appId to ObjectId only if it's a valid ObjectId
+    // Convert appId to ObjectId only if it's valid
     const appIdToStore = ObjectId.isValid(appId) ? new ObjectId(appId) : appId;
 
     // Update user document by adding appId to blockedApps array
     await usersCollection.updateOne(
-      { _id: userObjectId }, // Corrected lookup
+      userQuery,
       { $addToSet: { blockedApps: appIdToStore } } // Prevents duplicates
     );
 
