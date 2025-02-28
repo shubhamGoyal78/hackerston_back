@@ -31,7 +31,7 @@ const {
   createNewChat,
   sendMessage,
   fetchChatHistory,
-} = require("./chatRoutes.js"); // Adjust the path if needed
+} = require("./chatRoutes"); // Ensure the correct path
 
 // Initialize Express app
 const app = express();
@@ -78,14 +78,10 @@ app.post("/postUserImages/:userid", postUserImages);
 app.get("/api/telegram-link", fetchTelegramLink);
 app.get("/api/playstore-link", fetchPlaystoreLink);
 
-// Create a new chat
-app.post("/api/chat", createNewChat);
-
-// Send a message (creates chat if none exists)
-app.post("/api/chat/message", sendMessage);
-
-// Fetch chat history
-app.get("/api/chat/:chatId", fetchChatHistory);
+// ✅ Chat Routes
+app.post("/api/chat", createNewChat); // Manually create a chat (Optional)
+app.post("/api/chat/message", sendMessage); // Send a message (Auto-create chat)
+app.get("/api/chat/:chatId", fetchChatHistory); // Fetch messages
 
 // Start server
 const port = process.env.PORT || 3000;
