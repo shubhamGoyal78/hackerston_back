@@ -51,25 +51,36 @@ async function createNewChat(req, res) {
 }
 
 // ✅ 2. Send Message (Create Chat if Needed)
-// ✅ 2. Send Message (Admin or User)
+// ✅ Send Message (Create Chat if Needed)
 async function sendMessage(req, res) {
   try {
     let { chatId, userId, message } = req.body;
 
-    if (!chatId || !message) {
+    if (!userId || !message) {
       return res
         .status(400)
-        .json({ message: "Chat ID and message are required" });
+        .json({ message: "User ID and message are required" });
     }
 
     const chatCollection = await connectToChatCollection();
-    const chatObjectId = new ObjectId(chatId);
 
-    // ✅ Check if the chat exists
-    let chatThread = await chatCollection.findOne({ _id: chatObjectId });
+    // If chatId is not provided, check if a chat exists for the user
+    if (!chatId) {
+      let chatThread = await chatCollection.findOne({ userId });
 
-    if (!chatThread) {
-      return res.status(404).json({ message: "Chat not found" });
+      if (!chatThread) {
+        // ✅ No chat exists, so create a new chat
+        const newChat = {
+          userId,
+          messages: [],
+          createdAt: new Date(),
+        };
+
+        const result = await chatCollection.insertOne(newChat);
+        chatId = result.insertedId.toString(); // Convert ObjectId to string
+      } else {
+        chatId = chatThread._id.toString(); // Use existing chat ID
+      }
     }
 
     // Detect sender type
@@ -84,7 +95,7 @@ async function sendMessage(req, res) {
 
     // ✅ Update the chat with the new message
     await chatCollection.updateOne(
-      { _id: chatObjectId },
+      { _id: new ObjectId(chatId) },
       { $push: { messages: newMessage } }
     );
 
