@@ -7,49 +7,65 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
-// Function to connect to the 'feedback' collection
-async function connectToFeedbackCollection() {
+// Function to connect to the 'chat' collection
+async function connectToChatCollection() {
   try {
     await client.connect();
     const db = client.db("Hackerston"); // Use the Hackerston database
-    return db.collection("feedback"); // Return 'feedback' collection
+    return db.collection("chat"); // Return 'chat' collection
   } catch (error) {
     console.error("Failed to connect to the database", error);
     throw error;
   }
 }
 
-// Function to submit feedback message
-async function submitFeedback(req, res) {
+// ✅ 1. Function for users and admin to send messages
+async function sendMessage(req, res) {
   try {
-    const { userId, message } = req.body;
+    const { userId, sender, message } = req.body;
 
-    if (!userId || !message) {
+    if (!userId || !sender || !message) {
       return res
         .status(400)
-        .json({ message: "User ID and message are required" });
+        .json({ message: "User ID, sender, and message are required" });
     }
 
-    const feedbackCollection = await connectToFeedbackCollection();
+    const chatCollection = await connectToChatCollection();
 
-    const newFeedback = {
-      userId,
+    // Find if a chat thread exists for the user
+    let chatThread = await chatCollection.findOne({ userId });
+
+    if (!chatThread) {
+      // If no chat exists, create a new chat document
+      chatThread = {
+        userId,
+        messages: [],
+        createdAt: new Date(),
+      };
+      await chatCollection.insertOne(chatThread);
+    }
+
+    // Add the new message to the conversation
+    const newMessage = {
+      sender, // 'user' or 'admin'
       message,
-      response: null, // Initially, no response from admin
-      createdAt: new Date(),
+      timestamp: new Date(),
     };
 
-    await feedbackCollection.insertOne(newFeedback);
+    await chatCollection.updateOne(
+      { userId },
+      { $push: { messages: newMessage } }
+    );
 
-    res.status(201).json({ message: "Feedback submitted successfully" });
+    res.status(201).json({ message: "Message sent successfully" });
   } catch (error) {
-    console.error("Error submitting feedback:", error);
+    console.error("Error sending message:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-// Function to fetch a user's feedback messages
-async function fetchUserFeedback(req, res) {
+// ✅ 2. Function to fetch chat history for a user
+async function fetchChatHistory(req, res) {
   try {
     const { userId } = req.params;
 
@@ -57,43 +73,18 @@ async function fetchUserFeedback(req, res) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const feedbackCollection = await connectToFeedbackCollection();
-    const userFeedback = await feedbackCollection.find({ userId }).toArray();
+    const chatCollection = await connectToChatCollection();
+    const chatThread = await chatCollection.findOne({ userId });
 
-    res.status(200).json(userFeedback);
+    if (!chatThread) {
+      return res.status(200).json({ messages: [] }); // Return empty array if no chat exists
+    }
+
+    res.status(200).json(chatThread.messages);
   } catch (error) {
-    console.error("Error fetching feedback:", error);
+    console.error("Error fetching chat history:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-// Function for the admin to respond to a feedback message
-async function respondToFeedback(req, res) {
-  try {
-    const { feedbackId } = req.params;
-    const { response } = req.body;
-
-    if (!feedbackId || !response) {
-      return res
-        .status(400)
-        .json({ message: "Feedback ID and response are required" });
-    }
-
-    const feedbackCollection = await connectToFeedbackCollection();
-    const result = await feedbackCollection.updateOne(
-      { _id: new ObjectId(feedbackId) },
-      { $set: { response } }
-    );
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "Feedback not found" });
-    }
-
-    res.status(200).json({ message: "Response added successfully" });
-  } catch (error) {
-    console.error("Error responding to feedback:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-module.exports = { submitFeedback, fetchUserFeedback, respondToFeedback };
+module.exports = { sendMessage, fetchChatHistory };
