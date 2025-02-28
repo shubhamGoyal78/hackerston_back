@@ -22,7 +22,7 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ 1. Function for users and admin to send messages
+// ✅ 1. Send Message (Admin to User OR User to Admin)
 async function sendMessage(req, res) {
   try {
     let { userId, message } = req.body;
@@ -33,16 +33,15 @@ async function sendMessage(req, res) {
         .json({ message: "User ID and message are required" });
     }
 
-    // Auto-detect sender type (Admin or User)
+    // Determine sender (Admin or User)
     const sender = userId === ADMIN_ID ? "admin" : "user";
 
     const chatCollection = await connectToChatCollection();
 
-    // Find if a chat thread exists for the user
+    // Find or create chat thread between user and admin
     let chatThread = await chatCollection.findOne({ userId });
 
     if (!chatThread) {
-      // If no chat exists, create a new chat document
       chatThread = {
         userId,
         messages: [],
@@ -53,7 +52,7 @@ async function sendMessage(req, res) {
 
     // Add the new message to the conversation
     const newMessage = {
-      sender, // 'user' or 'admin' (automatically determined)
+      sender,
       message,
       timestamp: new Date(),
     };
@@ -70,7 +69,7 @@ async function sendMessage(req, res) {
   }
 }
 
-// ✅ 2. Function to fetch chat history for a user
+// ✅ 2. Fetch Chat History (Admin or User)
 async function fetchChatHistory(req, res) {
   try {
     const { userId } = req.params;
