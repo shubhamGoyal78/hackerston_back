@@ -25,22 +25,16 @@ async function connectToChatCollection() {
 // ✅ 1. Function for users and admin to send messages
 async function sendMessage(req, res) {
   try {
-    let { userId, sender, message } = req.body;
+    let { userId, message } = req.body;
 
-    if (!sender || !message) {
+    if (!userId || !message) {
       return res
         .status(400)
-        .json({ message: "Sender and message are required" });
+        .json({ message: "User ID and message are required" });
     }
 
-    // If sender is 'admin', set userId to default ADMIN_ID
-    if (sender === "admin") {
-      userId = ADMIN_ID;
-    }
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
+    // Auto-detect sender type (Admin or User)
+    const sender = userId === ADMIN_ID ? "admin" : "user";
 
     const chatCollection = await connectToChatCollection();
 
@@ -59,7 +53,7 @@ async function sendMessage(req, res) {
 
     // Add the new message to the conversation
     const newMessage = {
-      sender, // 'user' or 'admin'
+      sender, // 'user' or 'admin' (automatically determined)
       message,
       timestamp: new Date(),
     };
