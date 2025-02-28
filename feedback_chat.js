@@ -14,43 +14,41 @@ const ADMIN_ID = "cc56704e-8e99-4d95-9849-657cf38678e0";
 async function connectToChatCollection() {
   try {
     await client.connect();
-    const db = client.db("Hackerston"); // Use the Hackerston database
-    return db.collection("chat"); // Return 'chat' collection
+    const db = client.db("Hackerston");
+    return db.collection("chat");
   } catch (error) {
     console.error("Failed to connect to the database", error);
     throw error;
   }
 }
 
-// ✅ 1. Send Message (Admin to User OR User to Admin)
+// ✅ 1. Send Message (Admin or User)
 async function sendMessage(req, res) {
   try {
-    let { userId, message } = req.body;
+    let { userId, message, chatId } = req.body; // chatId = _id in MongoDB
 
-    if (!userId || !message) {
+    if (!userId || !message || !chatId) {
       return res
         .status(400)
-        .json({ message: "User ID and message are required" });
+        .json({ message: "User ID, Chat ID, and message are required" });
     }
 
-    // Determine sender (Admin or User)
+    // Detect sender type
     const sender = userId === ADMIN_ID ? "admin" : "user";
 
     const chatCollection = await connectToChatCollection();
 
-    // Find or create chat thread between user and admin
-    let chatThread = await chatCollection.findOne({ userId });
+    // Convert chatId to MongoDB ObjectId
+    const chatObjectId = new ObjectId(chatId);
+
+    // Find the chat document using _id
+    let chatThread = await chatCollection.findOne({ _id: chatObjectId });
 
     if (!chatThread) {
-      chatThread = {
-        userId,
-        messages: [],
-        createdAt: new Date(),
-      };
-      await chatCollection.insertOne(chatThread);
+      return res.status(404).json({ message: "Chat thread not found" });
     }
 
-    // Add the new message to the conversation
+    // Add the new message
     const newMessage = {
       sender,
       message,
@@ -58,7 +56,7 @@ async function sendMessage(req, res) {
     };
 
     await chatCollection.updateOne(
-      { userId },
+      { _id: chatObjectId },
       { $push: { messages: newMessage } }
     );
 
@@ -72,17 +70,18 @@ async function sendMessage(req, res) {
 // ✅ 2. Fetch Chat History (Admin or User)
 async function fetchChatHistory(req, res) {
   try {
-    const { userId } = req.params;
+    const { chatId } = req.params;
 
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
+    if (!chatId) {
+      return res.status(400).json({ message: "Chat ID is required" });
     }
 
     const chatCollection = await connectToChatCollection();
-    const chatThread = await chatCollection.findOne({ userId });
+    const chatObjectId = new ObjectId(chatId);
+    const chatThread = await chatCollection.findOne({ _id: chatObjectId });
 
     if (!chatThread) {
-      return res.status(200).json({ messages: [] }); // Return empty array if no chat exists
+      return res.status(200).json({ messages: [] });
     }
 
     res.status(200).json(chatThread.messages);
