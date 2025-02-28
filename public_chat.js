@@ -1,5 +1,6 @@
 const { MongoClient, ObjectId } = require("mongodb");
 
+// MongoDB Connection URI
 const uri =
   "mongodb+srv://subhamgoyal08:ON0EmEDfqU6CXdlr@hackerston.7tunh.mongodb.net/?retryWrites=true&w=majority&appName=hackerston";
 const client = new MongoClient(uri, {
@@ -7,6 +8,7 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
+// Function to connect to the database
 async function connectToDb() {
   try {
     await client.connect();
@@ -18,6 +20,7 @@ async function connectToDb() {
   }
 }
 
+// ✅ POST: Add new chat message
 async function postMessage(req, res) {
   try {
     const { userId, message } = req.body;
