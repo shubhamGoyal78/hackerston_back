@@ -27,7 +27,11 @@ const { fetchAllAppInfo } = require("./fetch_app_thumbnail");
 const { applyReferralCode } = require("./apply_code");
 const { checkAppliedCoupon } = require("./check_apply_coupon");
 const { fetchReferDetails } = require("./fetch_referdetails");
-const { sendMessage, fetchChatHistory } = require("./feedback_chat");
+const {
+  createNewChat,
+  sendMessage,
+  fetchChatHistory,
+} = require("./chatRoutes.js"); // Adjust the path if needed
 
 // Initialize Express app
 const app = express();
@@ -74,9 +78,14 @@ app.post("/postUserImages/:userid", postUserImages);
 app.get("/api/telegram-link", fetchTelegramLink);
 app.get("/api/playstore-link", fetchPlaystoreLink);
 
-// Chat routes
-app.post("/chat/send", sendMessage); // Send message (user/admin)
-app.get("/chat/history/:userId", fetchChatHistory); // Fetch chat history
+// Create a new chat
+app.post("/api/chat", createNewChat);
+
+// Send a message (creates chat if none exists)
+app.post("/api/chat/message", sendMessage);
+
+// Fetch chat history
+app.get("/api/chat/:chatId", fetchChatHistory);
 
 // Start server
 const port = process.env.PORT || 3000;

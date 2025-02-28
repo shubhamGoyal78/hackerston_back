@@ -22,21 +22,61 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ 1. Send Message (Admin or User)
+// ✅ 1. Create New Chat
+async function createNewChat(req, res) {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const chatCollection = await connectToChatCollection();
+
+    // Create a new chat document
+    const newChat = {
+      userId,
+      messages: [],
+      createdAt: new Date(),
+    };
+
+    const result = await chatCollection.insertOne(newChat);
+    const chatId = result.insertedId.toString(); // Convert ObjectId to string
+
+    res.status(201).json({ chatId });
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+// ✅ 2. Send Message (Create Chat if Needed)
 async function sendMessage(req, res) {
   try {
-    let { userId, message, chatId } = req.body; // chatId = _id in MongoDB
+    let { userId, message, chatId } = req.body;
 
-    if (!userId || !message || !chatId) {
+    if (!userId || !message) {
       return res
         .status(400)
-        .json({ message: "User ID, Chat ID, and message are required" });
+        .json({ message: "User ID and message are required" });
+    }
+
+    const chatCollection = await connectToChatCollection();
+
+    // If no chatId, create a new chat
+    if (!chatId) {
+      const newChat = {
+        userId,
+        messages: [],
+        createdAt: new Date(),
+      };
+
+      const result = await chatCollection.insertOne(newChat);
+      chatId = result.insertedId.toString(); // Convert ObjectId to string
     }
 
     // Detect sender type
     const sender = userId === ADMIN_ID ? "admin" : "user";
-
-    const chatCollection = await connectToChatCollection();
 
     // Convert chatId to MongoDB ObjectId
     const chatObjectId = new ObjectId(chatId);
@@ -60,14 +100,14 @@ async function sendMessage(req, res) {
       { $push: { messages: newMessage } }
     );
 
-    res.status(201).json({ message: "Message sent successfully" });
+    res.status(201).json({ chatId, message: "Message sent successfully" });
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-// ✅ 2. Fetch Chat History (Admin or User)
+// ✅ 3. Fetch Chat History
 async function fetchChatHistory(req, res) {
   try {
     const { chatId } = req.params;
@@ -91,4 +131,4 @@ async function fetchChatHistory(req, res) {
   }
 }
 
-module.exports = { sendMessage, fetchChatHistory };
+module.exports = { createNewChat, sendMessage, fetchChatHistory };
