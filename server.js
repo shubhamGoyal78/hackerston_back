@@ -3,7 +3,6 @@ const express = require("express");
 const http = require("http"); // ✅ Added missing import
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const socketIo = require("socket.io");
 
 // Import route functions
 const { postUserImages } = require("./postimages_user");
@@ -11,7 +10,6 @@ const { addOneCoin } = require("./add_one_coins");
 const { fetchTelegramLink } = require("./telegram_link");
 const { fetchPlaystoreLink } = require("./playstore_link");
 const { blockApp } = require("./block_app");
-const { postMessage, getMessages } = require("./public_chat");
 
 const { loginOrSignup } = require("./login_signup_page");
 const { postCardInfo } = require("./store_cardinfo");
@@ -33,25 +31,10 @@ const { fetchReferDetails } = require("./fetch_referdetails");
 // Initialize Express app
 const app = express();
 const server = http.createServer(app); // ✅ Creating HTTP server properly
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
 
 // Middleware setup
 app.use(cors()); // ✅ Ensure CORS is set before defining routes
 app.use(bodyParser.json());
-
-// Socket.IO setup
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
-});
 
 // API Routes
 
@@ -82,10 +65,6 @@ app.post("/block-app", blockApp);
 app.post("/apply-coupon/:userId", applyReferralCode);
 app.get("/check-coupon/:userId", checkAppliedCoupon);
 app.get("/fetch_referdetails/:userId", fetchReferDetails);
-
-// Chat system
-app.post("/api/messages", postMessage);
-app.get("/api/messages", getMessages);
 
 // User images
 app.post("/postUserImages/:userid", postUserImages);
