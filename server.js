@@ -9,6 +9,7 @@ const { addOneCoin } = require("./add_one_coins");
 const { fetchTelegramLink } = require("./telegram_link"); // Import the function
 const { fetchPlaystoreLink } = require("./playstore_link"); // Import the function
 const { blockApp } = require("./block_app.js"); // Import the blockApp function
+const { postMessage, getMessages } = require("./public_chat.js"); // Import chat functions
 
 // Importing the functions to handle different routes
 const { loginOrSignup } = require("./login_signup_page"); // Unified login/signup functionality
@@ -50,7 +51,8 @@ app.post("/app-details", postAppDetails);
 app.get("/app-details/:id", fetchAppDetails);
 app.post("/app-thumbnail", postAppThumbnail); // New route for posting app thumbnails
 app.get("/api/apps", fetchAllAppInfo);
-
+app.post("/api/messages", postMessage);
+app.get("/api/messages", getMessages);
 app.post("/store_card_details", postCardDetails); // Endpoint for posting card details
 app.get("/fetch_card_details/:id", fetchCardDetails);
 app.get("/fetch_coins/:userId", fetchCoins);
