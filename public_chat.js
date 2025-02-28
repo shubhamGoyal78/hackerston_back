@@ -18,7 +18,6 @@ async function connectToDb() {
   }
 }
 
-// ✅ POST: Send a message
 async function postMessage(req, res) {
   try {
     const { userId, message } = req.body;
@@ -33,8 +32,8 @@ async function postMessage(req, res) {
     const usersCollection = db.collection("users");
     const chatCollection = db.collection("public_chat");
 
-    // Convert userId to ObjectId (MongoDB stores _id as ObjectId)
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    // 🔥 FIX: Remove ObjectId conversion 🔥
+    const user = await usersCollection.findOne({ _id: userId });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -54,7 +53,7 @@ async function postMessage(req, res) {
       .status(201)
       .json({ message: "Message sent successfully", data: newMessage });
   } catch (error) {
-    console.error("Error posting message:", error);
+    console.error("Error posting message:", error.message, error.stack);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
