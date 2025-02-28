@@ -7,6 +7,9 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
+// Default Admin ID
+const ADMIN_ID = "cc56704e-8e99-4d95-9849-657cf38678e0";
+
 // Function to connect to the 'chat' collection
 async function connectToChatCollection() {
   try {
@@ -22,12 +25,21 @@ async function connectToChatCollection() {
 // ✅ 1. Function for users and admin to send messages
 async function sendMessage(req, res) {
   try {
-    const { userId, sender, message } = req.body;
+    let { userId, sender, message } = req.body;
 
-    if (!userId || !sender || !message) {
+    if (!sender || !message) {
       return res
         .status(400)
-        .json({ message: "User ID, sender, and message are required" });
+        .json({ message: "Sender and message are required" });
+    }
+
+    // If sender is 'admin', set userId to default ADMIN_ID
+    if (sender === "admin") {
+      userId = ADMIN_ID;
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
     }
 
     const chatCollection = await connectToChatCollection();
