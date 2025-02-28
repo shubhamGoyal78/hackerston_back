@@ -28,6 +28,7 @@ const { applyReferralCode } = require("./apply_code");
 const { checkAppliedCoupon } = require("./check_apply_coupon");
 const { fetchReferDetails } = require("./fetch_referdetails");
 const { sendMessage, fetchChatHistory } = require("./chatRoutes"); // Ensure the correct path
+const { sendAdminMessage } = require("./admin_message");
 
 // Initialize Express app
 const app = express();
@@ -79,6 +80,8 @@ app.post("/api/chat/message", sendMessage);
 
 // ✅ Fetch chat history
 app.get("/api/chat/:chatId", fetchChatHistory);
+
+app.post("/api/chat/admin/message", sendAdminMessage);
 
 // Start server
 const port = process.env.PORT || 3000;
