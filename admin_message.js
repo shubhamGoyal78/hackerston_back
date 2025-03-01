@@ -22,7 +22,7 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ Admin Reply API
+// ✅ Admin Reply API with IST Timestamp
 async function sendAdminMessage(req, res) {
   try {
     let { chatId, message } = req.body;
@@ -43,11 +43,16 @@ async function sendAdminMessage(req, res) {
       return res.status(404).json({ message: "Chat not found" });
     }
 
-    // Create admin message object
+    // Convert timestamp to Indian Standard Time (IST)
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
+
+    // Create admin message object with IST timestamp
     const newMessage = {
       sender: "admin",
       message,
-      timestamp: new Date(),
+      timestamp,
     };
 
     // ✅ Update the chat with the new message

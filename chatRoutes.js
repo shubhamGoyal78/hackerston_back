@@ -27,7 +27,7 @@ async function sendMessage(req, res) {
   try {
     let { _id, userId, message } = req.body;
 
-    if (!_id || !message) {
+    if (!_id === undefined || !message) {
       return res
         .status(400)
         .json({ message: "Chat ID (_id) and message are required" });
@@ -52,11 +52,16 @@ async function sendMessage(req, res) {
     // Detect sender type
     const sender = userId === ADMIN_ID ? "admin" : "user";
 
+    // Convert timestamp to Indian Standard Time (IST)
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
+
     // Create message object
     const newMessage = {
       sender,
       message,
-      timestamp: new Date(),
+      timestamp,
     };
 
     // ✅ Update the chat with the new message
@@ -100,8 +105,15 @@ async function fetchChatHistory(req, res) {
     // ✅ Convert `_id` to `chat_id` before sending response
     const responseChat = {
       chat_id: chatThread._id.toString(),
-      messages: chatThread.messages,
-      createdAt: chatThread.createdAt,
+      messages: chatThread.messages.map((msg) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        }),
+      })),
+      createdAt: new Date(chatThread.createdAt).toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      }),
     };
 
     res.status(200).json(responseChat);
