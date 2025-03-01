@@ -44,9 +44,7 @@ async function sendAdminMessage(req, res) {
     }
 
     // Convert timestamp to Indian Standard Time (IST)
-    const timestamp = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-    });
+    const timestamp = new Date().toISOString(); // Send timestamp in ISO 8601 format
 
     // Create admin message object with IST timestamp
     const newMessage = {

@@ -27,7 +27,7 @@ async function sendMessage(req, res) {
   try {
     let { _id, userId, message } = req.body;
 
-    if (!_id === undefined || !message) {
+    if (!_id || !message) {
       return res
         .status(400)
         .json({ message: "Chat ID (_id) and message are required" });
@@ -35,36 +35,22 @@ async function sendMessage(req, res) {
 
     const chatCollection = await connectToChatCollection();
 
-    // Validate _id format
     if (!ObjectId.isValid(_id)) {
       return res.status(400).json({ message: "Invalid Chat ID (_id)" });
     }
 
     const chatId = new ObjectId(_id);
-
-    // Check if chat exists
     let chatThread = await chatCollection.findOne({ _id: chatId });
 
     if (!chatThread) {
       return res.status(404).json({ message: "Chat not found" });
     }
 
-    // Detect sender type
     const sender = userId === ADMIN_ID ? "admin" : "user";
+    const timestamp = new Date().toISOString(); // ✅ Store in ISO 8601 (UTC)
 
-    // Convert timestamp to Indian Standard Time (IST)
-    const timestamp = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-    });
+    const newMessage = { sender, message, timestamp };
 
-    // Create message object
-    const newMessage = {
-      sender,
-      message,
-      timestamp,
-    };
-
-    // ✅ Update the chat with the new message
     await chatCollection.updateOne(
       { _id: chatId },
       { $push: { messages: newMessage } }
@@ -89,7 +75,6 @@ async function fetchChatHistory(req, res) {
 
     const chatCollection = await connectToChatCollection();
 
-    // Validate chatId format
     if (!ObjectId.isValid(chatId)) {
       return res.status(400).json({ message: "Invalid Chat ID" });
     }
@@ -102,18 +87,13 @@ async function fetchChatHistory(req, res) {
       return res.status(404).json({ message: "Chat not found" });
     }
 
-    // ✅ Convert `_id` to `chat_id` before sending response
     const responseChat = {
       chat_id: chatThread._id.toString(),
       messages: chatThread.messages.map((msg) => ({
         ...msg,
-        timestamp: new Date(msg.timestamp).toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        }),
+        timestamp: msg.timestamp, // ✅ Send in ISO 8601 format
       })),
-      createdAt: new Date(chatThread.createdAt).toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      }),
+      createdAt: chatThread.createdAt, // ✅ Send in ISO 8601 format
     };
 
     res.status(200).json(responseChat);
