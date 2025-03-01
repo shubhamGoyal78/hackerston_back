@@ -51,7 +51,6 @@ async function createNewChat(req, res) {
 }
 
 // ✅ 2. Send Message (Create Chat if Needed)
-// ✅ Send Message (Create Chat if Needed)
 async function sendMessage(req, res) {
   try {
     let { chatId, userId, message } = req.body;
