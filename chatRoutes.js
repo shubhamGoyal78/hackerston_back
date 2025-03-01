@@ -109,20 +109,20 @@ async function sendMessage(req, res) {
 async function fetchChatHistory(req, res) {
   try {
     const { chatId } = req.params;
-
     if (!chatId) {
       return res.status(400).json({ message: "Chat ID is required" });
     }
 
     const chatCollection = await connectToChatCollection();
-    const chatObjectId = new ObjectId(chatId);
-    const chatThread = await chatCollection.findOne({ _id: chatObjectId });
+    const chatThread = await chatCollection.findOne({
+      _id: new ObjectId(chatId),
+    });
 
     if (!chatThread) {
       return res.status(200).json({ messages: [] });
     }
 
-    res.status(200).json(chatThread.messages);
+    res.status(200).json(chatThread); // Send the full chat object
   } catch (error) {
     console.error("Error fetching chat history:", error);
     res.status(500).json({ message: "Internal Server Error" });
