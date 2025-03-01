@@ -22,35 +22,7 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ 1. Create New Chat
-async function createNewChat(req, res) {
-  try {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
-    const chatCollection = await connectToChatCollection();
-
-    // Create a new chat document
-    const newChat = {
-      userId,
-      messages: [],
-      createdAt: new Date(),
-    };
-
-    const result = await chatCollection.insertOne(newChat);
-    const chatId = result.insertedId.toString(); // Convert ObjectId to string
-
-    res.status(201).json({ chatId });
-  } catch (error) {
-    console.error("Error creating chat:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-// ✅ 2. Send Message (Create Chat if Needed)
+// ✅ 1. Send Message (Create Chat if Needed)
 async function sendMessage(req, res) {
   try {
     let { chatId, userId, message } = req.body;
@@ -105,7 +77,7 @@ async function sendMessage(req, res) {
   }
 }
 
-// ✅ 3. Fetch Chat History
+// ✅ 2. Fetch Chat History
 async function fetchChatHistory(req, res) {
   try {
     const { chatId } = req.params;
@@ -129,4 +101,4 @@ async function fetchChatHistory(req, res) {
   }
 }
 
-module.exports = { createNewChat, sendMessage, fetchChatHistory };
+module.exports = { sendMessage, fetchChatHistory };
