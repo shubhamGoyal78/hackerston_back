@@ -22,7 +22,7 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ 1. Send Message (Using _id Instead of userId)
+// ✅ 1. Send Message (Returning chat_id Instead of _id)
 async function sendMessage(req, res) {
   try {
     let { _id, userId, message } = req.body;
@@ -65,14 +65,16 @@ async function sendMessage(req, res) {
       { $push: { messages: newMessage } }
     );
 
-    res.status(201).json({ chatId: _id, message: "Message sent successfully" });
+    res
+      .status(201)
+      .json({ chat_id: _id, message: "Message sent successfully" });
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-// ✅ 2. Fetch Chat History
+// ✅ 2. Fetch Chat History (Returning chat_id Instead of _id)
 async function fetchChatHistory(req, res) {
   try {
     const { chatId } = req.params;
@@ -95,7 +97,14 @@ async function fetchChatHistory(req, res) {
       return res.status(404).json({ message: "Chat not found" });
     }
 
-    res.status(200).json(chatThread);
+    // ✅ Convert `_id` to `chat_id` before sending response
+    const responseChat = {
+      chat_id: chatThread._id.toString(),
+      messages: chatThread.messages,
+      createdAt: chatThread.createdAt,
+    };
+
+    res.status(200).json(responseChat);
   } catch (error) {
     console.error("Error fetching chat history:", error);
     res.status(500).json({ message: "Internal Server Error" });
