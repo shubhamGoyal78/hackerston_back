@@ -22,36 +22,31 @@ async function connectToChatCollection() {
   }
 }
 
-// ✅ 1. Send Message (Create Chat if Needed)
+// ✅ 1. Send Message (Using _id Instead of userId)
 async function sendMessage(req, res) {
   try {
-    let { chatId, userId, message } = req.body;
+    let { _id, userId, message } = req.body;
 
-    if (!userId || !message) {
+    if (!_id || !message) {
       return res
         .status(400)
-        .json({ message: "User ID and message are required" });
+        .json({ message: "Chat ID (_id) and message are required" });
     }
 
     const chatCollection = await connectToChatCollection();
 
-    // If chatId is not provided, check if a chat exists for the user
-    if (!chatId) {
-      let chatThread = await chatCollection.findOne({ userId });
+    // Validate _id format
+    if (!ObjectId.isValid(_id)) {
+      return res.status(400).json({ message: "Invalid Chat ID (_id)" });
+    }
 
-      if (!chatThread) {
-        // ✅ No chat exists, so create a new chat
-        const newChat = {
-          userId,
-          messages: [],
-          createdAt: new Date(),
-        };
+    const chatId = new ObjectId(_id);
 
-        const result = await chatCollection.insertOne(newChat);
-        chatId = result.insertedId.toString(); // Convert ObjectId to string
-      } else {
-        chatId = chatThread._id.toString(); // Use existing chat ID
-      }
+    // Check if chat exists
+    let chatThread = await chatCollection.findOne({ _id: chatId });
+
+    if (!chatThread) {
+      return res.status(404).json({ message: "Chat not found" });
     }
 
     // Detect sender type
@@ -66,11 +61,11 @@ async function sendMessage(req, res) {
 
     // ✅ Update the chat with the new message
     await chatCollection.updateOne(
-      { _id: new ObjectId(chatId) },
+      { _id: chatId },
       { $push: { messages: newMessage } }
     );
 
-    res.status(201).json({ chatId, message: "Message sent successfully" });
+    res.status(201).json({ chatId: _id, message: "Message sent successfully" });
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -86,15 +81,21 @@ async function fetchChatHistory(req, res) {
     }
 
     const chatCollection = await connectToChatCollection();
+
+    // Validate chatId format
+    if (!ObjectId.isValid(chatId)) {
+      return res.status(400).json({ message: "Invalid Chat ID" });
+    }
+
     const chatThread = await chatCollection.findOne({
       _id: new ObjectId(chatId),
     });
 
     if (!chatThread) {
-      return res.status(200).json({ messages: [] });
+      return res.status(404).json({ message: "Chat not found" });
     }
 
-    res.status(200).json(chatThread); // Send the full chat object
+    res.status(200).json(chatThread);
   } catch (error) {
     console.error("Error fetching chat history:", error);
     res.status(500).json({ message: "Internal Server Error" });
