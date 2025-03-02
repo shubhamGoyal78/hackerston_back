@@ -31,6 +31,7 @@ const { sendMessage, fetchChatHistory } = require("./chatRoutes"); // Ensure the
 const { sendAdminMessage } = require("./admin_message");
 const { createNewChat } = require("./create_chat");
 const { fetchdownloadLink } = require("./download_link.js"); // Adjust path if needed
+const { fetchVideoLink } = require("./video_link.js"); // Import your function
 
 // Initialize Express app
 const app = express();
@@ -86,6 +87,7 @@ app.get("/api/chat/:chatId", fetchChatHistory);
 app.post("/api/chat/admin/message", sendAdminMessage);
 app.post("/api/create-chat", createNewChat);
 app.get("/api/download-link", fetchdownloadLink);
+app.get("/api/video-link", fetchVideoLink); // Expose API Endpoint
 
 // Start server
 const port = process.env.PORT || 3000;
